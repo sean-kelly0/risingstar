@@ -759,6 +759,17 @@ p {
   margin: 14px 0;
 }
 
+.listing-tags {
+  gap: 6px;
+  margin: 9px 0 12px;
+}
+
+.listing-tags .tag {
+  background: #edf1f6;
+  color: #465166;
+  font-size: 0.58rem;
+}
+
 .match-note {
   display: grid;
   gap: 3px;
@@ -1985,8 +1996,7 @@ h3 {
   line-height: 1.4;
 }
 
-.home-journeys,
-.coming-soon-section {
+.home-journeys {
   padding: 42px 0 52px;
 }
 
@@ -2068,8 +2078,7 @@ h3 {
   color: #14213d;
 }
 
-.journey-icon svg,
-.coming-soon-icon svg {
+.journey-icon svg {
   width: 27px;
   height: 27px;
   stroke: currentColor;
@@ -2196,83 +2205,31 @@ h3 {
   background: #d8e6f4;
 }
 
-.coming-soon-section {
-  margin-top: 8px;
-  padding: 38px;
-  border-radius: 24px;
-  background: #f1f3f6;
-}
-
-.coming-soon-section .home-section-heading {
-  margin-bottom: 20px;
-}
-
-.coming-soon-card {
-  display: flex;
-  align-items: center;
-  gap: 19px;
-  padding: 24px;
+.chat-upcoming-card {
+  margin-top: 22px;
   border: 1px solid #dfe3e9;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.75);
 }
 
-.coming-soon-icon {
-  display: grid;
-  width: 54px;
-  height: 54px;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 16px;
-  background: #e8ebf0;
-  color: #788396;
-}
-
-.coming-soon-copy {
-  flex: 1;
-}
-
-.coming-soon-title {
+.chat-upcoming-heading {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 11px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.coming-soon-title h3 {
+.chat-upcoming-heading h3 {
   margin: 0;
   color: #465166;
-  font-size: 1.06rem;
+  font-size: 0.95rem;
 }
 
-.coming-soon-badge {
-  border-radius: 999px;
-  padding: 5px 10px;
-  background: #e8ebf0;
-  color: #667185;
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.coming-soon-copy p {
-  max-width: 720px;
-  margin: 8px 0 0;
+.chat-upcoming-card > p {
+  margin: 9px 0 13px;
   color: #788396;
-  font-size: 0.83rem;
-}
-
-.notify-button {
-  flex: 0 0 auto;
-  border: 1px solid #d5dae2;
-  border-radius: 999px;
-  padding: 11px 18px;
-  background: #f1f3f6;
-  color: #8b95a5;
-  font-size: 0.76rem;
-  font-weight: 800;
-  cursor: not-allowed;
+  font-size: 0.75rem;
 }
 
 .nav.open {
@@ -2281,6 +2238,857 @@ h3 {
 
 footer .logo {
   color: #14213d;
+}
+
+.app-housemates .site-header,
+.app-housemates > footer {
+  display: none;
+}
+
+.app-housemates .housemates-screen {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+}
+
+.housemate-phone {
+  position: relative;
+  display: flex;
+  width: min(390px, 100%);
+  height: min(800px, calc(100dvh - 32px));
+  min-height: min(620px, calc(100dvh - 32px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e7eaf0;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(20, 33, 61, 0.16);
+  color: #14213d;
+}
+
+.housemate-header {
+  z-index: 2;
+  display: flex;
+  min-height: 78px;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #edf0f4;
+  padding: 12px 18px;
+  background: #fff;
+}
+
+.housemate-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.housemate-heading h1 {
+  overflow: hidden;
+  margin: 0 0 3px;
+  color: #14213d;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.housemate-heading p {
+  margin: 0;
+  color: #778196;
+  font-size: 0.76rem;
+}
+
+.housemate-header-back {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #e4e8ef;
+  border-radius: 50%;
+  background: white;
+  color: #14213d;
+  font-size: 1.15rem;
+}
+
+.matches-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border: 1px solid #e3e8ef;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #14213d;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.matches-count {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f4b400;
+  color: #14213d;
+  font-size: 0.68rem;
+}
+
+.housemate-chat-status {
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #eef5ed;
+  color: #397343;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.housemate-content {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  background: #f8f9fb;
+}
+
+.housemate-deck-view,
+.matches-view,
+.housemate-chat-view,
+.housemate-placeholder,
+.deck-empty {
+  width: 100%;
+  height: 100%;
+}
+
+.housemate-deck-view {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 12px;
+}
+
+.deck-intro,
+.matches-view-heading {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.housemate-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #778196;
+  font-size: 0.59rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deck-intro h2,
+.matches-view-heading h2 {
+  margin: 0;
+  color: #14213d;
+  font-size: 1.2rem;
+  letter-spacing: -0.04em;
+}
+
+.deck-counter {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #fff;
+  color: #657087;
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.profile-stack {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  margin: 14px 2px 10px;
+}
+
+.profile-peek,
+.housemate-profile-card {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.profile-peek {
+  box-shadow: 0 8px 22px rgba(23, 39, 66, 0.1);
+}
+
+.profile-peek-back {
+  inset: 12px 10px -1px;
+  background: #e7eaf0;
+  transform: rotate(3deg);
+}
+
+.profile-peek-front {
+  inset: 6px 5px -1px;
+  background: #f0f1f4;
+  transform: rotate(-1.6deg);
+}
+
+.housemate-profile-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  color: #fff;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  box-shadow: 0 15px 34px rgba(20, 33, 61, 0.2);
+  will-change: transform;
+}
+
+.housemate-profile-card.is-dragging {
+  cursor: grabbing;
+}
+
+.housemate-profile-card.is-swiping-right {
+  animation: housemate-fly-right 340ms ease-in forwards;
+}
+
+.housemate-profile-card.is-swiping-left {
+  animation: housemate-fly-left 340ms ease-in forwards;
+}
+
+.profile-card-topline {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.57rem;
+  font-weight: 850;
+  letter-spacing: 0.13em;
+  opacity: 0.9;
+}
+
+.profile-london {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 0.5rem;
+}
+
+.profile-avatar {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  flex: 0 0 auto;
+  place-items: center;
+  align-self: center;
+  margin: 15px 0 12px;
+  border: 4px solid rgba(255, 255, 255, 0.74);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 850;
+  box-shadow: 0 8px 20px rgba(32, 25, 49, 0.15);
+}
+
+.profile-avatar img,
+.match-list-avatar img,
+.match-avatar-them img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar img {
+  border-radius: 50%;
+}
+
+.profile-card-details {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.58) transparent;
+}
+
+.profile-card-details::-webkit-scrollbar {
+  width: 4px;
+}
+
+.profile-card-details::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.profile-card-details h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.profile-job {
+  margin: 2px 0 12px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  opacity: 0.93;
+}
+
+.profile-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profile-facts span,
+.profile-tags span {
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(30, 28, 54, 0.12);
+  font-size: 0.63rem;
+  font-weight: 700;
+}
+
+.profile-bio {
+  margin: 12px 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profile-tags span {
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.59rem;
+}
+
+.swipe-stamp {
+  position: absolute;
+  top: 54px;
+  z-index: 1;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 1.45rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 90ms linear;
+}
+
+.stamp-like {
+  left: 20px;
+  color: #e8ff80;
+  transform: rotate(-13deg);
+}
+
+.stamp-nope {
+  right: 20px;
+  color: #ffe5e9;
+  transform: rotate(13deg);
+}
+
+.swipe-controls {
+  display: flex;
+  height: 60px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.swipe-control {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 5px 18px rgba(20, 33, 61, 0.12);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.swipe-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.undo-control {
+  width: 38px;
+  height: 38px;
+  color: #8992a3;
+  font-size: 1.2rem;
+}
+
+.pass-control {
+  color: #dc5964;
+}
+
+.like-control {
+  width: 56px;
+  height: 56px;
+  background: #f4b400;
+  color: white;
+  font-size: 1.6rem;
+}
+
+.swipe-hint {
+  margin: 0;
+  color: #818b9d;
+  font-size: 0.63rem;
+  text-align: center;
+}
+
+.housemate-tab-bar {
+  z-index: 2;
+  display: grid;
+  min-height: 68px;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #eceff4;
+  background: #fff;
+}
+
+.housemate-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: #9099a9;
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.housemate-tab > span {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.housemate-tab.active {
+  color: #14213d;
+}
+
+.housemate-tab.active > span {
+  color: #d89f00;
+}
+
+.housemate-placeholder,
+.deck-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 34px;
+  text-align: center;
+}
+
+.placeholder-emoji {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 26px;
+  background: #fff3c8;
+  font-size: 2.1rem;
+}
+
+.housemate-placeholder h2,
+.deck-empty h2 {
+  max-width: 280px;
+  margin: 0 0 10px;
+  color: #14213d;
+  font-size: 1.55rem;
+  letter-spacing: -0.045em;
+}
+
+.housemate-placeholder p:not(.housemate-eyebrow),
+.deck-empty > p:not(.housemate-eyebrow) {
+  max-width: 280px;
+  margin: 0 0 20px;
+  color: #707b8e;
+  font-size: 0.83rem;
+}
+
+.matches-view {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 22px 20px;
+}
+
+.matches-view-heading {
+  margin-bottom: 17px;
+}
+
+.matches-view-heading .text-link {
+  flex: 0 0 auto;
+  font-size: 0.67rem;
+}
+
+.matches-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.matches-empty > span {
+  margin-bottom: 13px;
+  font-size: 2rem;
+}
+
+.matches-empty h3 {
+  margin-bottom: 7px;
+  color: #14213d;
+  font-size: 1rem;
+}
+
+.matches-empty p {
+  max-width: 250px;
+  margin-bottom: 17px;
+  color: #778196;
+  font-size: 0.76rem;
+}
+
+.matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-list-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #eaedf2;
+  border-radius: 16px;
+  padding: 10px;
+  background: #fff;
+}
+
+.match-list-avatar {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 15px;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 850;
+  overflow: hidden;
+}
+
+.match-list-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.match-list-copy h3 {
+  margin: 0 0 3px;
+  color: #14213d;
+  font-size: 0.85rem;
+}
+
+.match-list-copy p {
+  margin: 0;
+  color: #778196;
+  font-size: 0.64rem;
+}
+
+.message-match-button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: #fff0b7;
+  color: #14213d;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.housemate-chat-view {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+}
+
+.chat-demo-note {
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #edf1f6;
+  color: #677388;
+  font-size: 0.64rem;
+  text-align: center;
+}
+
+.housemate-chat-messages {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+  padding: 16px 2px;
+}
+
+.housemate-chat-bubble {
+  max-width: 82%;
+  border-radius: 16px;
+  padding: 11px 13px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.housemate-chat-bubble.match {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  background: #fff;
+  color: #344057;
+}
+
+.housemate-chat-bubble.you {
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  background: #14213d;
+  color: #fff;
+}
+
+.housemate-chat-form {
+  display: flex;
+  gap: 8px;
+  border: 1px solid #e5e9ef;
+  border-radius: 999px;
+  padding: 5px;
+  background: #fff;
+}
+
+.housemate-chat-form input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  outline: 0;
+  color: #14213d;
+  font-size: 0.78rem;
+}
+
+.housemate-chat-form button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: #f4b400;
+  color: #14213d;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.housemate-chat-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.match-overlay {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+  padding: 34px 28px;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255, 226, 130, 0.78), transparent 27%),
+    radial-gradient(circle at 88% 75%, rgba(255, 156, 184, 0.7), transparent 29%),
+    linear-gradient(145deg, #fff5d9, #fff 52%, #f9e7f0);
+  text-align: center;
+}
+
+.match-confetti {
+  margin-bottom: 15px;
+  color: #d89f00;
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+}
+
+.match-kicker {
+  margin-bottom: 8px;
+  color: #785e20;
+  font-size: 0.67rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.match-overlay h2 {
+  margin: 0;
+  color: #14213d;
+  font-size: 2rem;
+  letter-spacing: -0.06em;
+}
+
+.match-message {
+  max-width: 280px;
+  margin: 11px 0 20px;
+  color: #536078;
+  font-size: 0.83rem;
+}
+
+.match-avatars {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.match-avatar-you,
+.match-avatar-them {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border: 4px solid white;
+  border-radius: 50%;
+  background: #14213d;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 850;
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.15);
+}
+
+.match-avatar-them {
+  overflow: hidden;
+  margin-left: -13px;
+  font-size: 2rem;
+}
+
+.match-actions {
+  display: flex;
+  width: 100%;
+  max-width: 270px;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.match-actions .primary,
+.match-actions .secondary {
+  min-height: 44px;
+}
+
+.match-actions .secondary {
+  border-color: #dce2ea;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+@keyframes housemate-fly-right {
+  to { opacity: 0; transform: translate(580px, 30px) rotate(24deg); }
+}
+
+@keyframes housemate-fly-left {
+  to { opacity: 0; transform: translate(-580px, 30px) rotate(-24deg); }
+}
+
+@media (max-width: 480px) {
+  .app-housemates .housemates-screen {
+    min-height: 100dvh;
+    padding: 0;
+  }
+
+  .housemate-phone {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .housemate-deck-view {
+    padding: 14px 16px 10px;
+  }
+
+  .profile-stack {
+    margin-top: 10px;
+  }
+
+  .housemate-profile-card {
+    padding: 15px;
+  }
+
+  .profile-avatar {
+    width: 82px;
+    height: 82px;
+    margin: 10px 0;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 481px) {
+  .housemate-phone {
+    height: 100dvh;
+    min-height: 0;
+    border-radius: 0;
+  }
+
+  .housemate-header {
+    min-height: 66px;
+  }
+
+  .housemate-tab-bar {
+    min-height: 58px;
+  }
+
+  .housemate-deck-view {
+    padding-top: 8px;
+    padding-bottom: 6px;
+  }
+
+  .deck-intro {
+    min-height: 46px;
+  }
+
+  .profile-avatar {
+    width: 58px;
+    height: 58px;
+    margin: 6px 0;
+  }
+
+  .profile-bio {
+    margin: 6px 0;
+    font-size: 0.7rem;
+  }
+
+  .swipe-controls {
+    height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .housemate-profile-card,
+  .swipe-stamp {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 @media (max-width: 900px) {
@@ -2360,8 +3168,7 @@ footer .logo {
     padding: 12px 14px;
   }
 
-  .home-journeys,
-  .coming-soon-section {
+  .home-journeys {
     padding: 30px 0;
   }
 
@@ -2396,23 +3203,4 @@ footer .logo {
     padding: 23px;
   }
 
-  .coming-soon-section {
-    margin-top: 4px;
-    padding: 25px 18px;
-    border-radius: 20px;
-  }
-
-  .coming-soon-card {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    padding: 18px;
-  }
-
-  .coming-soon-copy {
-    flex-basis: calc(100% - 74px);
-  }
-
-  .notify-button {
-    margin-left: 73px;
-  }
 }

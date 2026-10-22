@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import nicosiaRoadProperty from "./imports/nicosia-road-property.jpg";
 import stokeNewingtonProperty from "./imports/1100xxs.webp";
 
 type Screen =
   | "home"
+  | "housemates"
   | "chat"
   | "recommendations"
   | "area"
@@ -30,20 +37,46 @@ type Listing = {
   description: string;
   listingType: "Rent" | "Buy";
   homeType: "Room" | "Shared home" | "Entire home";
+  propertyType: "Room" | "Flat" | "House";
+  bedrooms: number;
+  roomType?: "Single" | "Double";
+  tags: string[];
   housemates?: string;
 };
 
-type SearchStage = "welcome" | "goal" | "budget" | "area" | "commute" | "lifestyle" | "housing" | "roommates" | "review";
-type SearchGoal = "Property + roommate" | "Property only" | "Room in shared property" | "Roommate for existing property";
+type SearchStage = "welcome" | "goal" | "budget" | "commute" | "lifestyle" | "housing" | "roommates" | "review";
+type SearchGoal = "Rent a room" | "Rent a flat" | "Rent a house" | "Buy a flat" | "Buy a house";
 type SearchAnswers = {
   goal: SearchGoal | "";
   budget: string;
-  area: string;
   commute: string;
   lifestyle: string;
   housing: string;
   roommates: string;
 };
+type HousemateProfile = {
+  id: string;
+  name: string;
+  age: number;
+  job: string;
+  area: string;
+  budget: number;
+  moveIn: string;
+  bio: string;
+  tags: string[];
+  avatar: string;
+  photo: string;
+  colors: [string, string];
+};
+type HousemateTab = "Home" | "Housemates" | "Homie Chat" | "Coming Soon";
+type HousematePanel = "deck" | "matches" | "chat";
+type SwipeSnapshot = {
+  index: number;
+  missesSinceMatch: number;
+  totalLikes: number;
+  matches: HousemateProfile[];
+};
+type SwipeDirection = "left" | "right";
 
 const areas = [
   {
@@ -51,7 +84,8 @@ const areas = [
     image: "/images/leyton-home.jpg",
     note: "Creative, connected and still down to earth.",
     price: "Sample rooms from £895 pcm",
-    tags: ["Village feel", "Easy commute", "Independent", "Good value"],
+    tags: ["Green space", "Easy commute", "Local cafés", "Garden", "Good value"],
+    commuteScores: { "Central London": 3, "City / Canary Wharf": 2, "Mostly remote / flexible": 2 },
     overview: "Independent places, quick connections and streets that feel familiar sooner than you’d expect.",
     feel: "Morning coffee, market Saturdays and neighbours who say hello. It has energy without feeling rushed.",
     everyday: "Francis Road brings together independent cafés, useful shops and neighbourhood events.",
@@ -63,7 +97,8 @@ const areas = [
     image: nicosiaRoadProperty,
     note: "Neighbourly, lively and full of green space.",
     price: "Sample rooms from £825 pcm",
-    tags: ["Green space", "Good value", "Community", "Easy commute"],
+    tags: ["Green space", "Good value", "Community", "Easy commute", "Local cafés", "Garden"],
+    commuteScores: { "Central London": 2, "City / Canary Wharf": 2, "Mostly remote / flexible": 2 },
     overview: "A neighbourly feel, generous green space and a lively local high street.",
     feel: "Neighbourly and lively, with parks nearby when you need a slower afternoon.",
     everyday: "Markets, parks and independent shops make it easy to find a local routine.",
@@ -75,7 +110,8 @@ const areas = [
     image: stokeNewingtonProperty,
     note: "Leafy streets, good food and a slower rhythm.",
     price: "Sample rooms from £950 pcm",
-    tags: ["Calm", "Cafés", "Character"],
+    tags: ["Green space", "Local cafés", "Character", "Easy commute"],
+    commuteScores: { "Central London": 1, "City / Canary Wharf": 3, "Mostly remote / flexible": 2 },
     overview: "Leafy streets, independent cafés and a slower rhythm in a characterful part of north London.",
     feel: "Leafy residential streets offer a calmer pace, with independent places close by.",
     everyday: "Local cafés, shops and green spaces give the area an easy neighbourhood pace.",
@@ -84,7 +120,7 @@ const areas = [
   },
 ];
 
-const listings: Listing[] = [
+const listingDrafts: Omit<Listing, "propertyType" | "bedrooms" | "roomType" | "tags">[] = [
   {
     id: "leyton-house",
     area: "Leyton",
@@ -100,11 +136,11 @@ const listings: Listing[] = [
   {
     id: "leyton-flat",
     area: "Leyton",
-    title: "Quiet garden room",
+    title: "Quiet single room overlooking the garden",
     place: "Leyton · 3 bedroom flat",
-    price: "£925 pcm",
+    price: "£875 pcm",
     image: "/images/properties/leyton-garden-room.jpg",
-    description: "A generous double room overlooking the garden, with bills included.",
+    description: "A bright single room overlooking the garden, with bills included.",
     listingType: "Rent",
     homeType: "Room",
     housemates: "Two considerate housemates, shared garden and relaxed weeknight energy.",
@@ -112,7 +148,7 @@ const listings: Listing[] = [
   {
     id: "walthamstow-house",
     area: "Walthamstow",
-    title: "Victorian home near the market",
+    title: "Victorian double room near the market",
     place: "Walthamstow · 3 bedroom shared house",
     price: "£825 pcm",
     image: "/images/properties/walthamstow-victorian-room.jpg",
@@ -268,27 +304,93 @@ const listings: Listing[] = [
     listingType: "Buy",
     homeType: "Entire home",
   },
+  {
+    id: "walthamstow-whole-house-rent",
+    area: "Walthamstow",
+    title: "Three-bed family home near the park",
+    place: "Walthamstow · 3 bedroom house",
+    price: "£2,450 pcm",
+    image: "/images/properties/walthamstow-rental-house.jpg",
+    description: "A spacious sample rental with a private garden, generous living room and green space nearby.",
+    listingType: "Rent",
+    homeType: "Entire home",
+  },
+  {
+    id: "leyton-whole-house-rent",
+    area: "Leyton",
+    title: "Bright four-bed Leyton terrace",
+    place: "Leyton · 4 bedroom house",
+    price: "£3,100 pcm",
+    image: "/images/properties/leyton-family-rental-house.jpg",
+    description: "A roomy terrace with a garden and straightforward Central line connections.",
+    listingType: "Rent",
+    homeType: "Entire home",
+  },
 ];
+
+const listingTagsById: Record<string, string[]> = {
+  "leyton-house": ["Green space", "Easy commute", "Local cafés", "Shared dinners", "Friendly & independent", "Pet-friendly", "Work-from-home friendly"],
+  "leyton-flat": ["Green space", "Garden", "Easy commute", "Quiet, tidy household", "Pet-friendly"],
+  "walthamstow-house": ["Easy commute", "Local cafés", "Shared dinners", "Friendly & independent", "Work-from-home friendly"],
+  "stoke-newington-flat": ["Green space", "Local cafés", "Easy commute", "Quiet, tidy household", "Friendly & independent"],
+  "leyton-maisonette-rent": ["Green space", "Easy commute", "Local cafés", "Garden", "Good value"],
+  "walthamstow-room": ["Green space", "Garden", "Easy commute", "Shared dinners", "Pet-friendly"],
+  "stoke-flat-rent": ["Green space", "Local cafés", "Easy commute", "Garden"],
+  "leyton-flat-buy": ["Easy commute", "Local cafés", "Good value"],
+  "walthamstow-terrace-buy": ["Green space", "Easy commute", "Garden", "Good value"],
+  "stoke-maisonette-buy": ["Green space", "Local cafés", "Easy commute"],
+  "leyton-garden-house-rent": ["Green space", "Easy commute", "Garden", "Shared dinners", "Quiet, tidy household"],
+  "walthamstow-loft-rent": ["Green space", "Easy commute", "Local cafés", "Good value"],
+  "stoke-newington-room-rent": ["Local cafés", "Easy commute", "Quiet, tidy household", "Friendly & independent"],
+  "leyton-victorian-terrace-buy": ["Green space", "Easy commute", "Garden", "Good value"],
+  "walthamstow-flat-buy": ["Green space", "Easy commute", "Garden", "Good value"],
+  "stoke-newington-flat-buy": ["Local cafés", "Easy commute"],
+  "walthamstow-whole-house-rent": ["Green space", "Easy commute", "Garden", "Local cafés"],
+  "leyton-whole-house-rent": ["Green space", "Easy commute", "Garden", "Local cafés"],
+};
+
+const roomTypesById: Record<string, "Single" | "Double"> = {
+  "leyton-house": "Double",
+  "leyton-flat": "Single",
+  "walthamstow-house": "Double",
+  "stoke-newington-flat": "Double",
+  "walthamstow-room": "Double",
+  "leyton-garden-house-rent": "Double",
+  "stoke-newington-room-rent": "Double",
+};
+
+const listings: Listing[] = listingDrafts.map((listing) => {
+  const propertyText = `${listing.title} ${listing.place}`.toLocaleLowerCase("en-GB");
+  const propertyType =
+    listing.homeType === "Room"
+      ? "Room"
+      : /flat|maisonette|apartment/.test(propertyText)
+        ? "Flat"
+        : "House";
+  const bedrooms = Number(propertyText.match(/(\d+)[ -]bed(?:room)?/)?.[1] ?? 0);
+  return {
+    ...listing,
+    propertyType,
+    bedrooms,
+    roomType: roomTypesById[listing.id],
+    tags: listingTagsById[listing.id] ?? [],
+  };
+});
 
 function getAreaPriceLabel(
   areaName: string,
   listingMode: "All" | "Rent" | "Buy",
-  housing: string,
-  goal: SearchGoal | "",
+  answers: SearchAnswers,
 ): string {
   if (listingMode === "All") {
     return areas.find((area) => area.name === areaName)?.price ?? "Sample prices vary";
   }
 
-  const matchingListings = listings.filter((listing) => {
-    if (listing.area !== areaName || listing.listingType !== listingMode) return false;
-    if (listingMode === "Buy") return listing.homeType === "Entire home";
-    if (housing === "Entire home") return listing.homeType === "Entire home";
-    if (goal === "Room in shared property" || housing.toLocaleLowerCase("en-GB").includes("shared")) {
-      return listing.homeType === "Room";
-    }
-    return true;
-  });
+  const matchingListings = listings.filter(
+    (listing) =>
+      listing.area === areaName &&
+      matchesListingPreferences(listing, answers, listingMode),
+  );
   const lowestPrice = matchingListings
     .slice()
     .sort((first, second) => {
@@ -312,6 +414,7 @@ const roommateProfiles = [
     budget: "Up to £950 pcm",
     bio: "Creative, friendly and big on shared dinners — equally happy with a quiet night in.",
     vibe: "Social, tidy, relaxed",
+    tags: ["Shared dinners", "Friendly & independent", "Pet-friendly"],
   },
   {
     name: "Sam",
@@ -319,6 +422,7 @@ const roommateProfiles = [
     budget: "Up to £900 pcm",
     bio: "Works hybrid, loves a weekend market wander and appreciates clear, kind communication.",
     vibe: "Easy-going, considerate",
+    tags: ["Friendly & independent", "Work-from-home friendly"],
   },
   {
     name: "Jamie",
@@ -326,8 +430,32 @@ const roommateProfiles = [
     budget: "Up to £1,000 pcm",
     bio: "Into cooking, local cafés and keeping home peaceful after a busy day.",
     vibe: "Calm, sociable, clean",
+    tags: ["Shared dinners", "Quiet, tidy household"],
   },
 ];
+
+// Edit these demo profiles to change the people shown in the housemate swipe deck.
+const housemateSwipeProfiles: HousemateProfile[] = [
+  { id: "maya", name: "Maya", age: 27, job: "Graphic designer", area: "Camden", budget: 1100, moveIn: "1 June", bio: "Collects cookbooks, knows every good coffee spot, and is always up for a gallery wander.", tags: ["Loves cooking", "Tidy", "Works from home"], avatar: "M", photo: "/images/housemates/maya.jpg", colors: ["#ffb28e", "#e66780"] },
+  { id: "leo", name: "Leo", age: 29, job: "Primary school teacher", area: "Clapham", budget: 1250, moveIn: "15 June", bio: "Friendly homebody who likes Sunday roasts, plants, and keeping the kitchen clear.", tags: ["Early riser", "Pet-friendly", "Gym-goer"], avatar: "L", photo: "/images/housemates/leo.jpg", colors: ["#72c6b4", "#287a91"] },
+  { id: "amara", name: "Amara", age: 25, job: "Product researcher", area: "Shoreditch", budget: 1350, moveIn: "Flexible", bio: "Big on creative projects, low-key evenings, and sharing the occasional homemade dessert.", tags: ["Non-smoker", "Tidy", "Loves cooking"], avatar: "A", photo: "/images/housemates/amara.jpg", colors: ["#aa8cf0", "#5262ae"] },
+  { id: "elliot", name: "Elliot", age: 31, job: "Architect", area: "Islington", budget: 1400, moveIn: "1 July", bio: "Design nerd, weekend cyclist, and respectful flatmate who appreciates a calm home.", tags: ["Early riser", "Non-smoker", "Works from home"], avatar: "E", photo: "/images/housemates/elliot.jpg", colors: ["#e7ad55", "#bd5f45"] },
+  { id: "sana", name: "Sana", age: 26, job: "Nurse", area: "Brixton", budget: 1050, moveIn: "15 June", bio: "Shift worker, plant enthusiast, and fan of clear communication and shared playlists.", tags: ["Pet-friendly", "Tidy", "Night owl"], avatar: "S", photo: "/images/housemates/sana.jpg", colors: ["#e887bd", "#9860aa"] },
+  { id: "oliver", name: "Oliver", age: 28, job: "Software developer", area: "Hackney", budget: 1300, moveIn: "1 August", bio: "Hybrid worker who likes bouldering, a friendly chat, and a properly good flat playlist.", tags: ["Works from home", "Gym-goer", "Non-smoker"], avatar: "O", photo: "/images/housemates/oliver.jpg", colors: ["#67a9ec", "#3b68a4"] },
+  { id: "zara", name: "Zara", age: 24, job: "Fashion buyer", area: "Peckham", budget: 1000, moveIn: "Flexible", bio: "Thrift-shop explorer and enthusiastic cook who keeps things warm, welcoming, and relaxed.", tags: ["Loves cooking", "Social", "Pet-friendly"], avatar: "Z", photo: "/images/housemates/zara.jpg", colors: ["#f3a456", "#ce5369"] },
+  { id: "noah", name: "Noah", age: 30, job: "Environmental consultant", area: "Walthamstow", budget: 1150, moveIn: "1 June", bio: "Outdoorsy, considerate, and happiest after a long walk followed by a big bowl of pasta.", tags: ["Early riser", "Tidy", "Non-smoker"], avatar: "N", photo: "/images/housemates/noah.jpg", colors: ["#84bf72", "#418c82"] },
+  { id: "imani", name: "Imani", age: 27, job: "Music producer", area: "Dalston", budget: 1200, moveIn: "15 July", bio: "Creative but respectful of quiet hours, with a soft spot for live music and houseplants.", tags: ["Night owl", "Pet-friendly", "Works from home"], avatar: "I", photo: "/images/housemates/imani.jpg", colors: ["#9a83dc", "#d469a5"] },
+  { id: "freddie", name: "Freddie", age: 26, job: "Chef", area: "Deptford", budget: 950, moveIn: "1 June", bio: "Will absolutely cook too much food and offer you some. Clean, cheerful, and easy-going.", tags: ["Loves cooking", "Social", "Tidy"], avatar: "F", photo: "/images/housemates/freddie.jpg", colors: ["#e99862", "#b95440"] },
+];
+
+function shuffledHousemates() {
+  const shuffled = [...housemateSwipeProfiles];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const otherIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[otherIndex]] = [shuffled[otherIndex], shuffled[index]];
+  }
+  return shuffled;
+}
 
 function getQuestionReply(question: string): string {
   const normalized = question.toLocaleLowerCase("en-GB");
@@ -340,7 +468,7 @@ function getQuestionReply(question: string): string {
   if (normalized.includes("who") || normalized.includes("housemate") || normalized.includes("live")) {
     return "Housemates are a huge part of the home lore. I can show sample profiles and shared-home matches; always confirm who lives there and how the household works with the provider.";
   }
-  return "Homie’s running on lovingly scripted demo info, not mind-reading powers. Try asking about bills, bike storage or housemates.";
+  return "I can help with the details we have so far. Try asking about bills, bike storage or housemates.";
 }
 
 function getChatFaqReply(question: string): string | null {
@@ -357,49 +485,121 @@ function getChatFaqReply(question: string): string | null {
   return null;
 }
 
+function getUnsupportedChatReply(): string {
+  return "Sorry, I can't help with that. I can help you find a room, flat or house to rent, or a flat or house to buy; set your budget and commute; choose lifestyle and room or bedroom preferences; and review matching sample homes. Please choose one of the options shown.";
+}
+
 const areaTabs = ["Feel", "Everyday life", "Getting around", "Good to know"] as const;
 
 const searchChoices = {
-  goal: [
-    "Property + roommate",
-    "Property only",
-    "Room in shared property",
-    "Roommate for existing property",
-  ],
-  area: ["Leyton", "Walthamstow", "Stoke Newington"],
+  goal: ["Rent a room", "Rent a flat", "Rent a house", "Buy a flat", "Buy a house"],
   commute: ["Central London", "City / Canary Wharf", "Mostly remote / flexible"],
-  lifestyle: ["Green space & calm", "Cafés & local food", "Easy commute & energy"],
-  housing: ["Room in a shared home", "Entire home", "Shared house with common space"],
-  roommates: ["Sociable, shared dinners", "Friendly but independent", "Quiet, tidy household"],
+  lifestyle: ["Green space & parks", "Cafés & local food", "Easy commute", "Garden / outdoor space"],
+  roommates: [
+    "Sociable, shared dinners",
+    "Friendly but independent",
+    "Quiet, tidy household",
+    "Pet-friendly household",
+    "Works-from-home friendly",
+  ],
 } as const;
 
-function getBudgetChoices(goal: SearchGoal | "") {
-  if (goal === "Property only" || goal === "Property + roommate") {
-    return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Buy up to £600k"];
+function getBudgetChoices(goal: SearchGoal | ""): string[] {
+  switch (goal) {
+    case "Rent a room":
+      return ["Under £900 pcm", "£900–£1,500 pcm", "Flexible rental budget"];
+    case "Rent a flat":
+      return ["Under £2,000 pcm", "£2,000–£3,000 pcm", "Flexible rental budget"];
+    case "Rent a house":
+      return ["Under £2,500 pcm", "£2,500–£3,500 pcm", "Flexible rental budget"];
+    case "Buy a flat":
+      return ["Under £450k", "£450k–£600k", "Flexible purchase budget"];
+    case "Buy a house":
+      return ["Under £550k", "£550k–£700k", "Flexible purchase budget"];
+    default:
+      return ["Under £900 pcm", "£900–£1,500 pcm", "Flexible rental budget"];
   }
-  if (goal === "Room in shared property") {
-    return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Flexible rent budget"];
-  }
-  if (goal === "Roommate for existing property") {
-    return ["Under £900 pcm", "£900–£1,500 pcm", "Flexible budget"];
-  }
-  return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Flexible budget"];
+}
+
+function getListingModeFromGoal(goal: SearchGoal | ""): "Rent" | "Buy" | "All" {
+  if (goal.startsWith("Buy")) return "Buy";
+  if (goal.startsWith("Rent")) return "Rent";
+  return "All";
 }
 
 function getListingModeFromBudget(budget: string): "Rent" | "Buy" {
-  if (budget.startsWith("Buy")) return "Buy";
-  if (budget.startsWith("Rent")) return "Rent";
-  return "Rent";
+  return budget.toLowerCase().includes("purchase") || budget.includes("k") ? "Buy" : "Rent";
 }
 
-function getHousingChoices(goal: SearchGoal | "") {
-  if (goal === "Roommate for existing property") {
-    return ["Room available now", "Room available soon", "I have a whole place to share"];
+function getHousingChoices(goal: SearchGoal | ""): string[] {
+  if (goal === "Rent a room") return ["Single room", "Double room", "Any room size"];
+  return ["1 bedroom", "2 bedrooms", "3+ bedrooms", "Any number of bedrooms"];
+}
+
+function getLifestyleTag(lifestyle: string): string {
+  if (lifestyle.startsWith("Green")) return "Green space";
+  if (lifestyle.startsWith("Cafés")) return "Local cafés";
+  if (lifestyle.startsWith("Garden")) return "Garden";
+  return "Easy commute";
+}
+
+function getRoommateTag(preference: string): string {
+  if (preference.startsWith("Sociable")) return "Shared dinners";
+  if (preference.startsWith("Friendly")) return "Friendly & independent";
+  if (preference.startsWith("Quiet")) return "Quiet, tidy household";
+  if (preference.startsWith("Pet")) return "Pet-friendly";
+  return "Work-from-home friendly";
+}
+
+function getPriceBounds(budget: string): [number, number] | null {
+  if (!budget || budget.startsWith("Flexible")) return null;
+  const values = [...budget.matchAll(/£([\d,]+)(k)?/gi)].map((match) => {
+    const amount = Number(match[1].replace(/,/g, ""));
+    return match[2] ? amount * 1000 : amount;
+  });
+  if (!values.length) return null;
+  return values.length === 1 ? [0, values[0]] : [values[0], values[1]];
+}
+
+function getPropertyKind(goal: SearchGoal | ""): Listing["propertyType"] | null {
+  if (goal === "Rent a room") return "Room";
+  if (goal.endsWith("a flat")) return "Flat";
+  if (goal.endsWith("a house")) return "House";
+  return null;
+}
+
+function matchesListingPreferences(
+  listing: Listing,
+  answers: SearchAnswers,
+  fallbackMode: "All" | "Rent" | "Buy" = "All",
+): boolean {
+  const mode = answers.goal ? getListingModeFromGoal(answers.goal) : fallbackMode;
+  if (mode !== "All" && listing.listingType !== mode) return false;
+
+  const propertyKind = getPropertyKind(answers.goal);
+  if (propertyKind && listing.propertyType !== propertyKind) return false;
+
+  const price = Number(listing.price.replace(/[£,]/g, "").match(/\d+/)?.[0]);
+  const budgetBounds = getPriceBounds(answers.budget);
+  if (budgetBounds && (price < budgetBounds[0] || price > budgetBounds[1])) return false;
+
+  const lifestyleTag = answers.lifestyle ? getLifestyleTag(answers.lifestyle) : "";
+  if (lifestyleTag && !listing.tags.includes(lifestyleTag)) return false;
+
+  if (answers.housing === "Single room" && listing.roomType !== "Single") return false;
+  if (answers.housing === "Double room" && listing.roomType !== "Double") return false;
+  if (answers.housing === "1 bedroom" && listing.bedrooms !== 1) return false;
+  if (answers.housing === "2 bedrooms" && listing.bedrooms !== 2) return false;
+  if (answers.housing === "3+ bedrooms" && listing.bedrooms < 3) return false;
+
+  if (
+    answers.goal === "Rent a room" &&
+    answers.roommates &&
+    !listing.tags.includes(getRoommateTag(answers.roommates))
+  ) {
+    return false;
   }
-  if (goal === "Room in shared property") {
-    return ["Single room", "Double room", "Flexible on room type"];
-  }
-  return [...searchChoices.housing];
+  return true;
 }
 
 function getSearchPrompt(
@@ -408,23 +608,16 @@ function getSearchPrompt(
 ): Pick<ChatMessage, "text" | "options"> | null {
   const prompts: Partial<Record<SearchStage, Pick<ChatMessage, "text" | "options">>> = {
     welcome: {
-      text: "Hey, I’m Homie 🏠 Your London home hunt just got a sidekick. I’ll ask a few quick questions, then bring back sample areas, homes and potential housemates. No AI, no awkward DMs, no 47-tab spiral.",
+      text: "Hey, I’m Homie 🏠 Your London home hunt just got a sidekick. I’ll ask a few quick questions, then bring back areas, homes and potential housemates. No awkward DMs, no 47-tab spiral.",
       options: ["Start my search", "How does it work?", "Browse sample listings"],
     },
     goal: {
-      text: "First plot point: what are you looking for? Choose the closest fit; we’ll fine-tune the details as we go.",
+      text: "First plot point: what kind of place are you looking for? Choose a home type and I’ll keep the results focused.",
       options: [...searchChoices.goal],
     },
     budget: {
-      text:
-        answers?.goal === "Roommate for existing property"
-          ? "What monthly budget should your potential housemate fit? Pick the closest one; we’ll keep the numbers visible."
-          : "What budget should I keep in mind? Choose the closest fit for now — we’re not doing rent-price jump scares.",
+      text: "What budget should I keep in mind? Choose the closest fit for this kind of home — we’re not doing rent-price jump scares.",
       options: getBudgetChoices(answers?.goal ?? ""),
-    },
-    area: {
-      text: "Where should Homie drop the map pin? Pick the area you’re curious about; you can still change it later.",
-      options: [...searchChoices.area],
     },
     commute: {
       text: "What’s your regular commute destination (or are you gloriously remote)? This helps me rank the areas, not judge your WFH setup.",
@@ -436,15 +629,13 @@ function getSearchPrompt(
     },
     housing: {
       text:
-        answers?.goal === "Roommate for existing property"
-          ? "Tell me about the place you’ve already got so I can look for the right person, not the wrong floor plan."
-          : answers?.goal === "Room in shared property"
-            ? "What kind of room are you hoping to find?"
-            : "What kind of housing setup feels right?",
+        answers?.goal === "Rent a room"
+          ? "What kind of room are you hoping to find?"
+          : "How many bedrooms would feel right?",
       options: getHousingChoices(answers?.goal ?? ""),
     },
     roommates: {
-      text: "Last people-fit question: what housemate energy would make home feel good?",
+      text: "Last people-fit question: what kind of existing household would feel good to join?",
       options: [...searchChoices.roommates],
     },
     review: {
@@ -463,7 +654,6 @@ function getStageTransition(
   const reactions: Partial<Record<SearchStage, string>> = {
     goal: `Got you: ${selected.toLowerCase()}.`,
     budget: `Budget noted: ${selected}. Keeping the maths visible and the vibes immaculate.`,
-    area: `${selected}, locked in. Let’s make sure the commute doesn’t become your new full-time hobby.`,
     commute: "Commute noted. Now for the everyday-life stuff that makes a place feel like yours.",
     lifestyle: "Vibe check: passed. Let’s match that to the right kind of home setup.",
     housing: "Home setup noted.",
@@ -471,7 +661,6 @@ function getStageTransition(
   };
   const nextStageCopy: Partial<Record<SearchStage, string>> = {
     budget: "Next, let’s set the budget.",
-    area: "Now, pick an area to explore.",
     commute: "Where do you need to get to?",
     lifestyle: "What should your everyday feel like?",
     housing: "What kind of home are we matching?",
@@ -500,7 +689,6 @@ function App() {
   const [searchAnswers, setSearchAnswers] = useState<SearchAnswers>({
     goal: "",
     budget: "",
-    area: "",
     commute: "",
     lifestyle: "",
     housing: "",
@@ -537,6 +725,33 @@ function App() {
     data: "essential",
   });
   const [preferencesNotice, setPreferencesNotice] = useState("");
+  const [housemateTab, setHousemateTab] = useState<HousemateTab>("Housemates");
+  const [housematePanel, setHousematePanel] = useState<HousematePanel>("deck");
+  const [housemateDeck, setHousemateDeck] = useState(shuffledHousemates);
+  const [housemateIndex, setHousemateIndex] = useState(0);
+  const [housemateMatches, setHousemateMatches] = useState<HousemateProfile[]>([]);
+  const [activeMatch, setActiveMatch] = useState<HousemateProfile | null>(null);
+  const [matchVisible, setMatchVisible] = useState(false);
+  const [missesSinceMatch, setMissesSinceMatch] = useState(0);
+  const [totalLikes, setTotalLikes] = useState(0);
+  const [swipeHistory, setSwipeHistory] = useState<SwipeSnapshot[]>([]);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection | null>(null);
+  const [conversationProfile, setConversationProfile] = useState<HousemateProfile | null>(null);
+  const [housemateMessages, setHousemateMessages] = useState<{ from: "match" | "you"; text: string }[]>([]);
+  const [housemateMessageInput, setHousemateMessageInput] = useState("");
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const swipeTimer = useRef<number | undefined>(undefined);
+  const swipeLock = useRef(false);
+
+  useEffect(
+    () => () => {
+      if (swipeTimer.current !== undefined) window.clearTimeout(swipeTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     try {
@@ -586,7 +801,7 @@ function App() {
   };
 
   const goBack = () => {
-    const previous = history.at(-1) ?? "chat";
+    const previous = history.at(-1) ?? "home";
     setHistory((old) => old.slice(0, -1));
     setScreen(previous);
     scrollToTop();
@@ -662,14 +877,18 @@ function App() {
       if (normalized.includes("work") || normalized.includes("how")) {
         appendGuide({
           from: "guide",
-          text: "Homie will help set your goal, budget, area and day-to-day preferences, then show sample homes and potential roommate matches. You can review or change everything before seeing recommendations — no commitment, no plot twist.",
+          text: "Homie will help set your home type, budget, commute and day-to-day preferences, then show matching sample homes. Choose a room and we’ll also consider the existing household. You can review or change everything before seeing recommendations.",
           options: ["Start my search", "How does it work?", "Browse sample listings"],
         });
         setChatInput("");
         return;
       }
       if (!normalized.includes("start")) {
-        appendGuide({ from: "guide", ...getSearchPrompt("welcome")! });
+        appendGuide({
+          from: "guide",
+          text: getUnsupportedChatReply(),
+          options: ["Start my search", "How does it work?", "Browse sample listings"],
+        });
         setChatInput("");
         return;
       }
@@ -682,14 +901,14 @@ function App() {
     if (searchStage === "review") {
       const normalized = clean.toLocaleLowerCase("en-GB");
       if (normalized.includes("generate")) {
-        setListingArea(searchAnswers.area || "All areas");
-        setSelectedArea(searchAnswers.area || "Leyton");
+        setListingArea("All areas");
+        setSelectedArea("Leyton");
         setChatInput("");
         navigate("recommendations");
         return;
       }
       if (normalized.includes("start over")) {
-        setSearchAnswers({ goal: "", budget: "", area: "", commute: "", lifestyle: "", housing: "", roommates: "" });
+        setSearchAnswers({ goal: "", budget: "", commute: "", lifestyle: "", housing: "", roommates: "" });
         setFilters([]);
         setListingMode("All");
         setSearchStage("welcome");
@@ -702,7 +921,11 @@ function App() {
         browseListings("All areas", "All");
         return;
       }
-      appendGuide({ from: "guide", ...getSearchPrompt("review")! });
+      appendGuide({
+        from: "guide",
+        text: getUnsupportedChatReply(),
+        options: ["Generate recommendations", "Start over", "Browse sample listings"],
+      });
       setChatInput("");
       return;
     }
@@ -718,9 +941,7 @@ function App() {
       const faqReply = getChatFaqReply(clean);
       appendGuide({
         from: "guide",
-        text:
-          faqReply ??
-          "Homie’s keeping this demo to clear choices, not a choose-your-own-adventure with 900 endings. Tap the closest fit; you can tweak it in your review.",
+        text: faqReply ?? getUnsupportedChatReply(),
         options: [...stageChoices],
       });
       setChatInput("");
@@ -730,7 +951,6 @@ function App() {
     const answerKey: Record<Exclude<SearchStage, "welcome" | "review">, keyof SearchAnswers> = {
       goal: "goal",
       budget: "budget",
-      area: "area",
       commute: "commute",
       lifestyle: "lifestyle",
       housing: "housing",
@@ -743,27 +963,22 @@ function App() {
     let nextStage: SearchStage;
     switch (searchStage) {
       case "goal":
+        setListingMode(getListingModeFromGoal(selected as SearchGoal));
         nextStage = "budget";
         break;
       case "budget":
         setListingMode(getListingModeFromBudget(selected));
-        nextStage = "area";
-        break;
-      case "area":
-        setSelectedArea(selected);
         nextStage = "commute";
         break;
       case "commute":
         nextStage = "lifestyle";
         break;
       case "lifestyle":
-        setFilters([selected.includes("Green") ? "Green space" : selected.includes("Cafés") ? "Cafés" : "Easy commute"]);
+        setFilters([getLifestyleTag(selected)]);
         nextStage = "housing";
         break;
       case "housing": {
-        const needsRoommate =
-          updatedAnswers.goal !== "Property only" || selected.includes("shared");
-        nextStage = needsRoommate ? "roommates" : "review";
+        nextStage = updatedAnswers.goal === "Rent a room" ? "roommates" : "review";
         break;
       }
       case "roommates":
@@ -799,83 +1014,56 @@ function App() {
     setQuestionInput("");
   };
 
+  const selectedLifestyleTag = searchAnswers.lifestyle ? getLifestyleTag(searchAnswers.lifestyle) : "";
   const recommendedAreas = [...areas].sort((first, second) => {
-    const firstScore =
-      Number(first.name === searchAnswers.area) * 2 +
-      Number(filters.some((filter) => first.tags.includes(filter)));
-    const secondScore =
-      Number(second.name === searchAnswers.area) * 2 +
-      Number(filters.some((filter) => second.tags.includes(filter)));
-    return secondScore - firstScore;
+    const scoreArea = (area: (typeof areas)[number]) =>
+      (area.commuteScores[searchAnswers.commute as keyof typeof area.commuteScores] ?? 0) * 2 +
+      Number(Boolean(searchAnswers.lifestyle) && area.tags.includes(selectedLifestyleTag)) +
+      filters.filter((filter) => area.tags.includes(filter)).length;
+    return scoreArea(second) - scoreArea(first);
   });
   const currentArea = areas.find((area) => area.name === selectedArea) ?? areas[0];
   const areaListings = listings.filter(
     (listing) =>
       listing.area === selectedArea &&
-      (listingMode === "All" || listing.listingType === listingMode),
+      matchesListingPreferences(listing, searchAnswers, listingMode),
   );
   const selectedAreaPrice = getAreaPriceLabel(
     selectedArea,
     listingMode,
-    searchAnswers.housing,
-    searchAnswers.goal,
+    searchAnswers,
   );
-  const roommateSearch =
-    searchAnswers.goal !== "Property only" ||
-    searchAnswers.housing.toLocaleLowerCase("en-GB").includes("shared");
-  const recommendationListingMode = searchAnswers.budget
-    ? getListingModeFromBudget(searchAnswers.budget)
+  const roommateSearch = searchAnswers.goal === "Rent a room";
+  const recommendationListingMode = searchAnswers.goal
+    ? getListingModeFromGoal(searchAnswers.goal)
     : listingMode;
-  const recommendationListings = listings.filter(
-    (listing) => {
-      if (searchAnswers.goal === "Roommate for existing property") return false;
-      if (searchAnswers.area && listing.area !== searchAnswers.area) return false;
-      if (recommendationListingMode !== "All" && listing.listingType !== recommendationListingMode) return false;
-      const price = Number(listing.price.replace(/[£,]/g, "").match(/\d+/)?.[0]);
-      if (
-        listing.listingType === "Rent" &&
-        searchAnswers.budget.toLocaleLowerCase("en-GB").includes("under £900") &&
-        price > 900
-      ) {
-        return false;
-      }
-      if (
-        listing.listingType === "Rent" &&
-        searchAnswers.budget.includes("£900–£1,500") &&
-        (price < 900 || price > 1500)
-      ) {
-        return false;
-      }
-      if (listing.listingType === "Buy" && searchAnswers.budget.startsWith("Buy") && price > 600000) {
-        return false;
-      }
-      if (
-        (searchAnswers.goal === "Room in shared property" ||
-          (recommendationListingMode === "Rent" && searchAnswers.housing.includes("shared"))) &&
-        listing.homeType !== "Room"
-      ) {
-        return false;
-      }
-      if (searchAnswers.housing === "Entire home" && listing.homeType !== "Entire home") return false;
-      return true;
-    },
-  );
+  const recommendationListings = listings
+    .filter((listing) => matchesListingPreferences(listing, searchAnswers, listingMode))
+    .sort((first, second) => {
+      const getCommuteScore = (listing: Listing) =>
+        areas.find((area) => area.name === listing.area)?.commuteScores[
+          searchAnswers.commute as keyof (typeof areas)[number]["commuteScores"]
+        ] ?? 0;
+      return getCommuteScore(second) - getCommuteScore(first);
+    });
   const comparisonListings = listings.filter((listing) => saved.includes(listing.id));
   const roommateStyleTerms = searchAnswers.roommates.startsWith("Sociable")
-    ? ["social", "sociable"]
+    ? ["social", "sociable", "shared"]
     : searchAnswers.roommates.startsWith("Friendly")
-      ? ["easy-going", "considerate"]
-      : ["calm", "clean"];
+      ? ["easy-going", "considerate", "independent"]
+      : searchAnswers.roommates.startsWith("Quiet")
+        ? ["calm", "clean", "quiet", "tidy"]
+        : searchAnswers.roommates.startsWith("Pet")
+          ? ["pet", "animal"]
+          : ["work", "hybrid", "home"];
   const roommateMatchScore = (profile: (typeof roommateProfiles)[number]) =>
-    Number(profile.area === searchAnswers.area) * 2 +
     Number(roommateStyleTerms.some((term) => profile.vibe.toLocaleLowerCase("en-GB").includes(term)));
-  const recommendationProfiles = [...roommateProfiles].sort(
-    (first, second) => roommateMatchScore(second) - roommateMatchScore(first),
-  );
+  const recommendationProfiles = roommateProfiles
+    .filter((profile) => !searchAnswers.roommates || profile.tags.includes(getRoommateTag(searchAnswers.roommates)))
+    .sort((first, second) => roommateMatchScore(second) - roommateMatchScore(first));
   const progressStages: SearchStage[] = [
     "goal",
     "budget",
-    "area",
     "commute",
     "lifestyle",
     "housing",
@@ -888,7 +1076,6 @@ function App() {
   const reviewFields: { key: keyof SearchAnswers; label: string; options: readonly string[] }[] = [
     { key: "goal", label: "What you’re looking for", options: searchChoices.goal },
     { key: "budget", label: "Budget", options: getBudgetChoices(searchAnswers.goal) },
-    { key: "area", label: "Area", options: searchChoices.area },
     { key: "commute", label: "Commute", options: searchChoices.commute },
     { key: "lifestyle", label: "Lifestyle", options: searchChoices.lifestyle },
     { key: "housing", label: "Housing setup", options: getHousingChoices(searchAnswers.goal) },
@@ -899,14 +1086,19 @@ function App() {
       (listingArea === "All areas" || listing.area === listingArea) &&
       (listingMode === "All" || listing.listingType === listingMode),
   );
+  const currentHousemate = housemateDeck[housemateIndex];
 
   const activeNav =
     screen === "home"
       ? "Home"
-      : ["chat", "recommendations", "area", "adjust"].includes(screen)
+      : screen === "housemates"
         ? "Find a Housemate"
+        : ["chat", "recommendations", "area", "adjust"].includes(screen)
+        ? screen === "chat"
+          ? "Homie Chat"
+          : "Find a Housemate"
         : screen === "questions"
-          ? "FAQ & Tips"
+          ? "Homie Chat"
       : screen === "rooms"
         ? listingMode === "Buy"
           ? "Buy"
@@ -915,10 +1107,10 @@ function App() {
 
   const navItems: [string, Screen][] = [
     ["Home", "home"],
-    ["Find a Housemate", "chat"],
+    ["Homie Chat", "chat"],
     ["Rent", "rooms"],
     ["Buy", "rooms"],
-    ["FAQ & Tips", "questions"],
+    ["Find a Housemate", "housemates"],
     ["Accessibility", "accessibility"],
   ];
 
@@ -952,9 +1144,16 @@ function App() {
     navigate("chat");
   };
 
+  const openHousemateFeature = () => {
+    setHousemateTab("Housemates");
+    setHousematePanel("deck");
+    setMatchVisible(false);
+    navigate("housemates");
+  };
+
   const handleNavigation = (label: string, destination: Screen) => {
     if (label === "Find a Housemate") {
-      startHousemateSearch();
+      openHousemateFeature();
     } else if (label === "Rent") {
       browseListings("All areas", "Rent");
     } else if (label === "Buy") {
@@ -991,8 +1190,122 @@ function App() {
     }
   };
 
+  const triggerHousemateSwipe = (direction: SwipeDirection) => {
+    if (!currentHousemate || swipeLock.current) return;
+    swipeLock.current = true;
+    swipeStart.current = null;
+    setIsDragging(false);
+    setSwipeDirection(direction);
+    setDragOffset({ x: direction === "right" ? 520 : -520, y: dragOffsetRef.current.y });
+    swipeTimer.current = window.setTimeout(() => {
+      setSwipeHistory((old) => [
+        ...old,
+        { index: housemateIndex, missesSinceMatch, totalLikes, matches: housemateMatches },
+      ]);
+      setHousemateIndex((index) => index + 1);
+      if (direction === "right") {
+        const isMatch = totalLikes === 0 || missesSinceMatch >= 2 || Math.random() < 0.4;
+        setTotalLikes((count) => count + 1);
+        if (isMatch) {
+          setMissesSinceMatch(0);
+          setHousemateMatches((old) =>
+            old.some((match) => match.id === currentHousemate.id) ? old : [...old, currentHousemate],
+          );
+          setActiveMatch(currentHousemate);
+          setMatchVisible(true);
+        } else {
+          setMissesSinceMatch((count) => count + 1);
+        }
+      }
+      setSwipeDirection(null);
+      setDragOffset({ x: 0, y: 0 });
+      dragOffsetRef.current = { x: 0, y: 0 };
+      swipeLock.current = false;
+      swipeTimer.current = undefined;
+    }, preferences.reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 340);
+  };
+
+  const handleHousematePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
+    if (!currentHousemate || swipeLock.current || event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    swipeStart.current = { x: event.clientX, y: event.clientY };
+    setIsDragging(true);
+  };
+
+  const handleHousematePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    if (!swipeStart.current || swipeLock.current) return;
+    const offset = {
+      x: event.clientX - swipeStart.current.x,
+      y: event.clientY - swipeStart.current.y,
+    };
+    dragOffsetRef.current = offset;
+    setDragOffset(offset);
+  };
+
+  const handleHousematePointerUp = () => {
+    if (!swipeStart.current || swipeLock.current) return;
+    const { x } = dragOffsetRef.current;
+    swipeStart.current = null;
+    setIsDragging(false);
+    if (Math.abs(x) >= 110) {
+      triggerHousemateSwipe(x > 0 ? "right" : "left");
+    } else {
+      setDragOffset({ x: 0, y: 0 });
+      dragOffsetRef.current = { x: 0, y: 0 };
+    }
+  };
+
+  const undoHousemateSwipe = () => {
+    if (swipeLock.current) return;
+    const snapshot = swipeHistory.at(-1);
+    if (!snapshot) return;
+    setHousemateIndex(snapshot.index);
+    setMissesSinceMatch(snapshot.missesSinceMatch);
+    setTotalLikes(snapshot.totalLikes);
+    setHousemateMatches(snapshot.matches);
+    setSwipeHistory((old) => old.slice(0, -1));
+    setActiveMatch(null);
+    setMatchVisible(false);
+    setHousematePanel("deck");
+    setDragOffset({ x: 0, y: 0 });
+    dragOffsetRef.current = { x: 0, y: 0 };
+  };
+
+  const restartHousemateDeck = () => {
+    setHousemateDeck(shuffledHousemates());
+    setHousemateIndex(0);
+    setMissesSinceMatch(0);
+    setTotalLikes(0);
+    setSwipeHistory([]);
+    setActiveMatch(null);
+    setMatchVisible(false);
+    setHousematePanel("deck");
+    setHousemateTab("Housemates");
+  };
+
+  const openHousemateChat = (profile: HousemateProfile) => {
+    setConversationProfile(profile);
+    setHousemateMessages([
+      {
+        from: "match",
+        text: `Hey! Are you still looking for a place around ${profile.area}?`,
+      },
+    ]);
+    setHousemateMessageInput("");
+    setMatchVisible(false);
+    setHousematePanel("chat");
+  };
+
+  const sendHousemateMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const cleanMessage = housemateMessageInput.trim();
+    if (!cleanMessage) return;
+    setHousemateMessages((old) => [...old, { from: "you", text: cleanMessage }]);
+    setHousemateMessageInput("");
+  };
+
   return (
-    <div className="app">
+    <div className={screen === "housemates" ? "app app-housemates" : "app"}>
       <header className="site-header">
         <Logo goHome={goHome} />
         <nav className={mobileNav ? "nav open" : "nav"} aria-label="Main navigation">
@@ -1016,11 +1329,314 @@ function App() {
         </button>
       </header>
 
-      <main key={screen} className="screen fade-in">
-        {screen !== "home" && screen !== "chat" && (
+      <main key={screen} className={screen === "housemates" ? "screen housemates-screen fade-in" : "screen fade-in"}>
+        {screen !== "home" && screen !== "chat" && screen !== "housemates" && (
           <button className="back-link" onClick={goBack}>
             ← Back
           </button>
+        )}
+
+        {screen === "housemates" && (
+          <section className="housemate-phone" aria-label="Find a Housemate demo">
+            <header className="housemate-header">
+              {housematePanel === "chat" ? (
+                <button
+                  className="housemate-header-back"
+                  aria-label="Back to matches"
+                  onClick={() => setHousematePanel("matches")}
+                >
+                  ←
+                </button>
+              ) : (
+                <button
+                  className="housemate-header-back"
+                  aria-label="Back to previous page"
+                  onClick={goBack}
+                >
+                  ←
+                </button>
+              )}
+              <div className="housemate-heading">
+                <h1>{housematePanel === "chat" ? conversationProfile?.name ?? "Messages" : "Find a Housemate 🏠"}</h1>
+                <p>{housematePanel === "chat" ? "London · demo chat" : "London"}</p>
+              </div>
+              {housematePanel === "chat" ? (
+                <span className="housemate-chat-status">Demo</span>
+              ) : (
+                <button
+                  className="matches-button"
+                  onClick={() => {
+                    setHousematePanel("matches");
+                    setHousemateTab("Housemates");
+                  }}
+                  aria-label={`View matches, ${housemateMatches.length} total`}
+                >
+                  Matches <span className="matches-count">{housemateMatches.length}</span>
+                </button>
+              )}
+            </header>
+
+            <div className="housemate-content">
+              {housemateTab !== "Housemates" && (
+                <section className="housemate-placeholder">
+                  <div className="placeholder-emoji" aria-hidden="true">
+                    {housemateTab === "Home" ? "🏡" : housemateTab === "Homie Chat" ? "💬" : "✨"}
+                  </div>
+                  <p className="housemate-eyebrow">Rising Star Homes · London</p>
+                  <h2>
+                    {housemateTab === "Home"
+                      ? "Your next chapter starts here."
+                      : housemateTab === "Homie Chat"
+                        ? "Chat with Homie."
+                        : "Something lovely is on the way."}
+                  </h2>
+                  <p>
+                    {housemateTab === "Home"
+                      ? "Explore the housemate demo, or take a look around the rest of the site."
+                      : housemateTab === "Homie Chat"
+                        ? "Get help exploring homes, areas and housemate options."
+                        : "More ways to find a place and people who fit are coming soon."}
+                  </p>
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setHousemateTab("Housemates");
+                      setHousematePanel("deck");
+                    }}
+                  >
+                    Back to housemates
+                  </button>
+                </section>
+              )}
+
+              {housemateTab === "Housemates" && housematePanel === "deck" && currentHousemate && (
+                <div className="housemate-deck-view">
+                  <div className="deck-intro">
+                    <div>
+                      <span className="housemate-eyebrow">Good people, better house shares</span>
+                      <h2>Meet your next housemate.</h2>
+                    </div>
+                    <span className="deck-counter">{housemateIndex + 1} / {housemateDeck.length}</span>
+                  </div>
+                  <div className="profile-stack" aria-label="Housemate profiles">
+                    {housemateDeck[housemateIndex + 1] && <div className="profile-peek profile-peek-back" />}
+                    {housemateDeck[housemateIndex + 1] && <div className="profile-peek profile-peek-front" />}
+                    <article
+                      className={`housemate-profile-card${isDragging ? " is-dragging" : ""}${swipeDirection ? ` is-swiping-${swipeDirection}` : ""}`}
+                      style={{
+                        transform: swipeDirection
+                          ? undefined
+                          : `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${dragOffset.x / 22}deg)`,
+                        transition: isDragging ? "none" : undefined,
+                        background: `linear-gradient(145deg, ${currentHousemate.colors[0]}, ${currentHousemate.colors[1]})`,
+                      }}
+                      onPointerDown={handleHousematePointerDown}
+                      onPointerMove={handleHousematePointerMove}
+                      onPointerUp={handleHousematePointerUp}
+                      onPointerCancel={handleHousematePointerUp}
+                    >
+                      <div className="profile-card-topline">
+                        <span>HOUSEMATE SPOTLIGHT</span>
+                        <span className="profile-london">LONDON</span>
+                      </div>
+                      <div className="profile-avatar">
+                        <img src={currentHousemate.photo} alt={`${currentHousemate.name}, ${currentHousemate.age}`} />
+                      </div>
+                      <div className="profile-card-details">
+                        <h3>{currentHousemate.name}, {currentHousemate.age}</h3>
+                        <p className="profile-job">{currentHousemate.job}</p>
+                        <div className="profile-facts">
+                          <span>⌖ {currentHousemate.area}</span>
+                          <span>£{currentHousemate.budget.toLocaleString("en-GB")} / month</span>
+                          <span>Move-in: {currentHousemate.moveIn}</span>
+                        </div>
+                        <p className="profile-bio">{currentHousemate.bio}</p>
+                        <div className="profile-tags">
+                          {currentHousemate.tags.map((tag) => <span key={tag}>{tag}</span>)}
+                        </div>
+                      </div>
+                      <div
+                        className={`swipe-stamp stamp-like${dragOffset.x > 0 ? " is-visible" : ""}`}
+                        style={{ opacity: Math.min(Math.max(dragOffset.x / 75, 0), 1) }}
+                        aria-hidden="true"
+                      >
+                        LIKE
+                      </div>
+                      <div
+                        className={`swipe-stamp stamp-nope${dragOffset.x < 0 ? " is-visible" : ""}`}
+                        style={{ opacity: Math.min(Math.max(-dragOffset.x / 75, 0), 1) }}
+                        aria-hidden="true"
+                      >
+                        NOPE
+                      </div>
+                    </article>
+                  </div>
+                  <div className="swipe-controls" aria-label="Choose whether to pass or like">
+                    <button
+                      className="swipe-control undo-control"
+                      onClick={undoHousemateSwipe}
+                      disabled={!swipeHistory.length || swipeLock.current}
+                      aria-label="Undo last swipe"
+                      title="Undo last swipe"
+                    >
+                      ↺
+                    </button>
+                    <button
+                      className="swipe-control pass-control"
+                      onClick={() => triggerHousemateSwipe("left")}
+                      disabled={swipeLock.current}
+                      aria-label={`Pass on ${currentHousemate.name}`}
+                      title="Pass"
+                    >
+                      ✕
+                    </button>
+                    <button
+                      className="swipe-control like-control"
+                      onClick={() => triggerHousemateSwipe("right")}
+                      disabled={swipeLock.current}
+                      aria-label={`Like ${currentHousemate.name}`}
+                      title="Like"
+                    >
+                      ♥
+                    </button>
+                  </div>
+                  <p className="swipe-hint">Swipe right to like · left to pass</p>
+                </div>
+              )}
+
+              {housemateTab === "Housemates" && housematePanel === "deck" && !currentHousemate && (
+                <section className="deck-empty">
+                  <div className="placeholder-emoji" aria-hidden="true">🎉</div>
+                  <p className="housemate-eyebrow">That’s everyone for now</p>
+                  <h2>You’ve seen everyone nearby.</h2>
+                  <p>Take another look — the deck will be shuffled for a fresh start.</p>
+                  <button className="primary" onClick={restartHousemateDeck}>Start again</button>
+                  {swipeHistory.length > 0 && (
+                    <button className="secondary deck-undo-button" onClick={undoHousemateSwipe}>
+                      ↺ Undo last swipe
+                    </button>
+                  )}
+                </section>
+              )}
+
+              {housemateTab === "Housemates" && housematePanel === "matches" && (
+                <section className="matches-view">
+                  <div className="matches-view-heading">
+                    <div>
+                      <span className="housemate-eyebrow">The good connections</span>
+                      <h2>Your matches</h2>
+                    </div>
+                    <button className="text-link" onClick={() => setHousematePanel("deck")}>Back to swiping</button>
+                  </div>
+                  {housemateMatches.length === 0 ? (
+                    <div className="matches-empty">
+                      <span aria-hidden="true">💛</span>
+                      <h3>Your matches will show up here.</h3>
+                      <p>Like someone in the deck to get the good vibes started.</p>
+                      <button className="primary" onClick={() => setHousematePanel("deck")}>Meet housemates</button>
+                    </div>
+                  ) : (
+                    <div className="matches-list">
+                      {housemateMatches.map((profile) => (
+                        <article className="match-list-card" key={profile.id}>
+                          <div
+                            className="match-list-avatar"
+                            style={{ background: `linear-gradient(145deg, ${profile.colors[0]}, ${profile.colors[1]})` }}
+                          >
+                            <img src={profile.photo} alt="" />
+                          </div>
+                          <div className="match-list-copy">
+                            <h3>{profile.name}, {profile.age}</h3>
+                            <p>{profile.area} · up to £{profile.budget.toLocaleString("en-GB")} / month</p>
+                          </div>
+                          <button className="message-match-button" onClick={() => openHousemateChat(profile)}>
+                            Message
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {housemateTab === "Housemates" && housematePanel === "chat" && (
+                <section className="housemate-chat-view" aria-label={`Demo conversation with ${conversationProfile?.name ?? "match"}`}>
+                  <div className="chat-demo-note">A friendly demo chat. No messages are sent to anyone.</div>
+                  <div className="housemate-chat-messages" aria-live="polite">
+                    {housemateMessages.map((message, index) => (
+                      <div className={`housemate-chat-bubble ${message.from}`} key={`${index}-${message.text}`}>
+                        {message.text}
+                      </div>
+                    ))}
+                  </div>
+                  <form className="housemate-chat-form" onSubmit={sendHousemateMessage}>
+                    <input
+                      value={housemateMessageInput}
+                      onChange={(event) => setHousemateMessageInput(event.target.value)}
+                      placeholder="Write a message…"
+                      aria-label="Write a demo message"
+                    />
+                    <button type="submit" aria-label="Send demo message" disabled={!housemateMessageInput.trim()}>
+                      Send
+                    </button>
+                  </form>
+                </section>
+              )}
+            </div>
+
+            <nav className="housemate-tab-bar" aria-label="Housemate app tabs">
+              {(["Home", "Housemates", "Homie Chat", "Coming Soon"] as const).map((item) => (
+                <button
+                  key={item}
+                  className={housemateTab === item ? "housemate-tab active" : "housemate-tab"}
+                  aria-current={housemateTab === item ? "page" : undefined}
+                  onClick={() => {
+                    if (item === "Home") {
+                      goHome();
+                      return;
+                    }
+                    if (item === "Homie Chat") {
+                      navigate("chat");
+                      return;
+                    }
+                    setHousemateTab(item);
+                    if (item === "Housemates") setHousematePanel("deck");
+                    setMatchVisible(false);
+                  }}
+                >
+                  <span aria-hidden="true">
+                    {item === "Home" ? "⌂" : item === "Housemates" ? "♡" : item === "Homie Chat" ? "💬" : "✦"}
+                  </span>
+                  {item}
+                </button>
+              ))}
+            </nav>
+
+            {matchVisible && activeMatch && (
+              <div className="match-overlay" role="dialog" aria-modal="true" aria-labelledby="match-title">
+                <div className="match-confetti" aria-hidden="true">✦ ✧ ✦</div>
+                <p className="match-kicker">A lovely London connection</p>
+                <h2 id="match-title">It’s a Match! 🎉</h2>
+                <p className="match-message">
+                  {activeMatch.name} is looking for a place in {activeMatch.area} — see if your plans line up.
+                </p>
+                <div className="match-avatars">
+                  <div className="match-avatar-you">You</div>
+                  <div
+                    className="match-avatar-them"
+                    style={{ background: `linear-gradient(145deg, ${activeMatch.colors[0]}, ${activeMatch.colors[1]})` }}
+                    aria-label={`${activeMatch.name}'s avatar`}
+                  >
+                    <img src={activeMatch.photo} alt="" />
+                  </div>
+                </div>
+                <div className="match-actions">
+                  <button className="primary" onClick={() => openHousemateChat(activeMatch)}>Send a message</button>
+                  <button className="secondary" onClick={() => setMatchVisible(false)}>Keep swiping</button>
+                </div>
+              </div>
+            )}
+          </section>
         )}
 
         {screen === "home" && (
@@ -1034,7 +1650,7 @@ function App() {
                   Rising Star makes the process simple.
                 </p>
                 <div className="home-hero-actions">
-                  <button className="primary" onClick={startHousemateSearch}>
+                  <button className="primary" onClick={openHousemateFeature}>
                     Find a Housemate
                   </button>
                   <button className="secondary" onClick={() => browseListings("All areas", "All")}>
@@ -1076,7 +1692,7 @@ function App() {
                     <span className="journey-priority">A great place to start</span>
                     <h3>Find a Housemate</h3>
                     <p>Find a room in a shared home or meet someone to share your place with.</p>
-                    <button className="journey-link" onClick={startHousemateSearch}>
+                    <button className="journey-link" onClick={openHousemateFeature}>
                       Explore housemate matching <span aria-hidden="true">→</span>
                     </button>
                   </div>
@@ -1119,43 +1735,15 @@ function App() {
                       <path d="M19 19a5 5 0 1 1 8.4 3.7c-2.2 2-3.4 3-3.4 6.3m0 6h.01" />
                     </svg>
                   </div>
-                  <h3>FAQ &amp; Tips</h3>
-                  <p>Get clear answers to common questions about finding a place.</p>
-                  <button className="journey-link" onClick={() => navigate("questions")}>
-                    Browse FAQs &amp; tips <span aria-hidden="true">→</span>
+                  <h3>Homie Chat</h3>
+                  <p>Get help exploring homes, areas and housemate options.</p>
+                  <button className="journey-link" onClick={() => navigate("chat")}>
+                    Chat with Homie <span aria-hidden="true">→</span>
                   </button>
                 </article>
               </div>
             </section>
 
-            <section className="coming-soon-section" aria-labelledby="coming-soon-heading">
-              <div className="home-section-heading">
-                <div>
-                  <div className="eyebrow">On the horizon</div>
-                  <h2 id="coming-soon-heading">Coming Soon</h2>
-                </div>
-              </div>
-              <article className="coming-soon-card">
-                <div className="coming-soon-icon" aria-hidden="true">
-                  <svg viewBox="0 0 48 48" fill="none">
-                    <path d="M8 11h32v23H22l-9 7v-7H8V11Z" />
-                    <path d="M17 20h14M17 26h9" />
-                  </svg>
-                </div>
-                <div className="coming-soon-copy">
-                  <div className="coming-soon-title">
-                    <h3>HomeFinder AI Assistant</h3>
-                    <span className="coming-soon-badge">Coming Soon</span>
-                  </div>
-                  <p>
-                    An intelligent assistant that will help future customers navigate renting, buying and finding suitable accommodation.
-                  </p>
-                </div>
-                <button className="notify-button" disabled title="Notifications are not available yet">
-                  Notify Me
-                </button>
-              </article>
-            </section>
           </section>
         )}
 
@@ -1201,7 +1789,8 @@ function App() {
                               <article className="chat-suggestion-card" key={listing.id}>
                                 <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                                 <div className="chat-suggestion-copy">
-                                  <span className="tag">{listing.area} · {listing.listingType} · {listing.homeType}</span>
+                                  <span className="tag">{listing.area} · {listing.listingType} · {listing.propertyType}</span>
+                                  <TagList tags={listing.tags} label="Property features" />
                                   <h3>{listing.title}</h3>
                                   <p>{listing.description}</p>
                                   {listing.housemates && <p><strong>Housemate vibe:</strong> {listing.housemates}</p>}
@@ -1271,26 +1860,22 @@ function App() {
                                       if (field.key === "goal") {
                                         const goal = value as SearchGoal;
                                         const budget = getBudgetChoices(goal)[0];
-                                        setSearchAnswers((current) => ({ ...current, goal, budget }));
-                                        setListingMode(getListingModeFromBudget(budget));
+                                        setSearchAnswers((current) => ({
+                                          ...current,
+                                          goal,
+                                          budget,
+                                          housing: getHousingChoices(goal)[0],
+                                          roommates: goal === "Rent a room" ? current.roommates : "",
+                                        }));
+                                        setListingMode(getListingModeFromGoal(goal));
                                       } else {
                                         setSearchAnswers((current) => ({ ...current, [field.key]: value }));
-                                      }
-                                      if (field.key === "area") {
-                                        setSelectedArea(value);
-                                        setListingArea(value);
                                       }
                                       if (field.key === "budget") {
                                         setListingMode(getListingModeFromBudget(value));
                                       }
                                       if (field.key === "lifestyle") {
-                                        setFilters([
-                                          value.includes("Green")
-                                            ? "Green space"
-                                            : value.includes("Cafés")
-                                              ? "Cafés"
-                                              : "Easy commute",
-                                        ]);
+                                        setFilters([getLifestyleTag(value)]);
                                       }
                                     }}
                                   >
@@ -1359,7 +1944,15 @@ function App() {
                   <li>Tell Homie your housing and people preferences.</li>
                   <li>Review the brief, then meet your sample matches.</li>
                 </ol>
-                <p>No AI, live listings or messages sent. Homie is a demo sidekick, not a lettings agent.</p>
+                <p>Homie helps you explore your options, refine your search and discover potential matches. Listings and profiles are examples, and Homie is not a lettings agent.</p>
+                <section className="chat-upcoming-card" aria-labelledby="chat-upcoming-title">
+                  <div className="chat-upcoming-heading">
+                    <div>
+                      <h3 id="chat-upcoming-title">HomeFinder AI Assistant</h3>
+                    </div>
+                  </div>
+                  <p>An intelligent assistant to help you navigate renting, buying and finding suitable accommodation.</p>
+                </section>
               </aside>
             </div>
           </section>
@@ -1371,12 +1964,12 @@ function App() {
             <h1>Your shortlist era starts now.</h1>
             <p className="lede">
               {filters.length === 0
-                ? "Area matches are prioritised by your location and lifestyle choices, with sample homes and people-fit below."
-                : "Prioritised by your selected vibes and search answers."}
+                ? "Areas are ranked by commute and lifestyle fit, with homes filtered by your budget and selected home type."
+                : "Prioritised by your commute, lifestyle and chosen home details."}
             </p>
             <div className="recommendation-actions">
               <span>
-                {searchAnswers.goal ? `${searchAnswers.goal} · ${searchAnswers.budget} · ${searchAnswers.area}` : "Sample recommendations"}
+                {searchAnswers.goal ? `${searchAnswers.goal} · ${searchAnswers.budget} · ${searchAnswers.commute}` : "Sample recommendations"}
               </span>
               <button className="secondary" onClick={() => navigate("chat")}>
                 Change answers / recalculate
@@ -1384,7 +1977,7 @@ function App() {
             </div>
             <div className="filter-bar">
               <strong>Prioritise a vibe:</strong>
-              {["Easy commute", "Good value", "Green space", "Cafés", "Community"].map((filter) => (
+              {["Easy commute", "Good value", "Green space", "Local cafés", "Community"].map((filter) => (
                 <button
                   key={filter}
                   className={filters.includes(filter) ? "chip active" : "chip"}
@@ -1414,11 +2007,12 @@ function App() {
                     <div className="match-note">
                       <strong>Why it fits</strong>
                       <span>
-                        {area.gettingAround} {searchAnswers.commute && `Your commute focus: ${searchAnswers.commute}.`}
+                        {area.gettingAround} {searchAnswers.commute && `Ranked for your ${searchAnswers.commute} commute.`}
+                        {searchAnswers.lifestyle && ` Lifestyle priority: ${searchAnswers.lifestyle.toLocaleLowerCase("en-GB")}.`}
                       </span>
                     </div>
                     <p className="price">
-                      {getAreaPriceLabel(area.name, recommendationListingMode, searchAnswers.housing, searchAnswers.goal)}
+                      {getAreaPriceLabel(area.name, recommendationListingMode, searchAnswers)}
                     </p>
                     <button className="primary" onClick={() => openArea(area.name)}>
                       Explore {area.name} →
@@ -1458,7 +2052,8 @@ function App() {
                     <article className="property-card" key={listing.id}>
                       <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                       <div>
-                        <span className="tag">{listing.area} · {listing.listingType} · {listing.homeType}</span>
+                        <span className="tag">{listing.area} · {listing.listingType} · {listing.propertyType}</span>
+                        <TagList tags={listing.tags} label="Property features" />
                         <h3>{listing.title}</h3>
                         <p>{listing.description}</p>
                         {listing.housemates && <p><strong>Housemate vibe:</strong> {listing.housemates}</p>}
@@ -1485,7 +2080,7 @@ function App() {
               ) : (
                 <div className="empty-listings" role="status">
                   <h3>No sample homes match this exact combination yet.</h3>
-                  <p>Change your answers to widen the area, budget or housing setup.</p>
+                  <p>Change your budget, lifestyle, room size or home type to see other options.</p>
                 </div>
               )}
               {comparisonListings.length > 1 && (
@@ -1505,7 +2100,7 @@ function App() {
                         <tr key={listing.id}>
                           <th scope="row">{listing.title}</th>
                           <td>{listing.area}</td>
-                          <td>{listing.listingType} · {listing.homeType}</td>
+                          <td>{listing.listingType} · {listing.propertyType}</td>
                           <td>{listing.price}</td>
                         </tr>
                       ))}
@@ -1533,6 +2128,7 @@ function App() {
                       <h3>{profile.name}</h3>
                       <p>{profile.bio}</p>
                       <strong>{profile.vibe}</strong>
+                      <TagList tags={profile.tags} label="Household tags" />
                       <button
                         className={housemateShortlist.includes(profile.name) ? "save active" : "save"}
                         aria-pressed={housemateShortlist.includes(profile.name)}
@@ -1662,7 +2258,8 @@ function App() {
                     <article className="property-card" key={listing.id}>
                       <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                       <div>
-                        <span className="tag">{listing.listingType} · {listing.homeType}</span>
+                        <span className="tag">{listing.listingType} · {listing.propertyType}</span>
+                        <TagList tags={listing.tags} label="Property features" />
                         <h3>{listing.title}</h3>
                         <p>{listing.description}</p>
                         <div className="property-card-actions">
@@ -1699,11 +2296,19 @@ function App() {
         {screen === "rooms" && (
           <section>
             <div className="eyebrow">
-              {listingArea === "All areas" ? "Sample homes across all neighbourhoods" : `${listingArea} homes chosen for your search`}
+              {listingMode === "Rent"
+                ? listingArea === "All areas" ? "Rentals across London" : `Rentals in ${listingArea}`
+                : listingMode === "Buy"
+                  ? listingArea === "All areas" ? "Homes for sale across London" : `Homes for sale in ${listingArea}`
+                  : listingArea === "All areas" ? "Sample homes across all neighbourhoods" : `${listingArea} homes chosen for your search`}
             </div>
-            <h1>Rent, buy, or find your people.</h1>
+            <h1>{listingMode === "Rent" ? "Find a place to rent." : listingMode === "Buy" ? "Find a home to buy." : "Explore London homes."}</h1>
             <p className="lede">
-              Browse sample rooms, shared homes and places to buy. Listings and prices are demo content, not live offers; photos are representative, not of specific homes.
+              {listingMode === "Rent"
+                ? "Browse sample rooms and homes for rent. Listings and prices are examples, not live offers; photos are representative, not of specific homes."
+                : listingMode === "Buy"
+                  ? "Browse sample homes for sale. Listings and prices are examples, not live offers; photos are representative, not of specific homes."
+                  : "Browse sample rentals and homes for sale. Listings and prices are examples, not live offers; photos are representative, not of specific homes."}
             </p>
             <div className="listing-filters" aria-label="Filter sample listings">
               <label>
@@ -1715,18 +2320,20 @@ function App() {
                   ))}
                 </select>
               </label>
-              <div className="filter-options" aria-label="Listing type">
-                {(["All", "Rent", "Buy"] as const).map((type) => (
-                  <button
-                    className={listingMode === type ? "chip active" : "chip"}
-                    key={type}
-                    aria-pressed={listingMode === type}
-                    onClick={() => setListingMode(type)}
-                  >
-                    {type === "All" ? "Rent or buy" : type === "Rent" ? "To rent" : "To buy"}
-                  </button>
-                ))}
-              </div>
+              {listingMode === "All" && (
+                <div className="filter-options" aria-label="Listing type">
+                  {(["All", "Rent", "Buy"] as const).map((type) => (
+                    <button
+                      className={listingMode === type ? "chip active" : "chip"}
+                      key={type}
+                      aria-pressed={listingMode === type}
+                      onClick={() => setListingMode(type)}
+                    >
+                      {type === "All" ? "Rent or buy" : type === "Rent" ? "To rent" : "To buy"}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="room-layout">
               <div>
@@ -1740,7 +2347,8 @@ function App() {
                   <article className="room-card" key={listing.id}>
                     <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                     <div className="room-copy">
-                      <span className="tag">{listing.listingType} · {listing.homeType} · Sample</span>
+                      <span className="tag">{listing.listingType} · {listing.propertyType} · Sample</span>
+                      <TagList tags={listing.tags} label="Property features" />
                       <h2>{listing.title}</h2>
                       <p>{listing.place}</p>
                       <p>{listing.description}</p>
@@ -1840,7 +2448,7 @@ function App() {
               {[
                 { title: "Keep your budget", filter: "Good value", copy: "Focus on neighbourhoods with lower room prices." },
                 { title: "Find green space", filter: "Green space", copy: "Prioritise places with parks and room to slow down." },
-                { title: "Stay close to cafés", filter: "Cafés", copy: "Look for areas with independent cafés and local character." },
+                { title: "Stay close to cafés", filter: "Local cafés", copy: "Look for areas with independent cafés and local character." },
               ].map(({ title, filter, copy }, index) => (
                 <article className="adjust-card" key={title}>
                   <span className="number">0{index + 1}</span>
@@ -1993,6 +2601,16 @@ function App() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function TagList({ tags, label }: { tags: string[]; label: string }) {
+  return (
+    <div className="tags listing-tags" aria-label={label}>
+      {tags.map((tag) => (
+        <span className="tag" key={tag}>{tag}</span>
+      ))}
     </div>
   );
 }
