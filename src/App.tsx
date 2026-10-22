@@ -9,9 +9,7 @@ type Screen =
   | "rooms"
   | "questions"
   | "adjust"
-  | "accessibility"
-  | "messages"
-  | "states";
+  | "accessibility";
 
 type ChatMessage = {
   from: "you" | "guide";
@@ -92,7 +90,7 @@ const listings: Listing[] = [
     title: "Bright double room",
     place: "Leyton · 4 bedroom house",
     price: "£895 pcm",
-    image: "/images/room-leaf.png",
+    image: "/images/properties/leyton-bright-double.jpg",
     description: "A calm, light-filled room in a friendly shared home near Francis Road.",
     listingType: "Rent",
     homeType: "Room",
@@ -104,7 +102,7 @@ const listings: Listing[] = [
     title: "Quiet garden room",
     place: "Leyton · 3 bedroom flat",
     price: "£925 pcm",
-    image: "/images/room-light.png",
+    image: "/images/properties/leyton-garden-room.jpg",
     description: "A generous double room overlooking the garden, with bills included.",
     listingType: "Rent",
     homeType: "Room",
@@ -116,7 +114,7 @@ const listings: Listing[] = [
     title: "Victorian home near the market",
     place: "Walthamstow · 3 bedroom shared house",
     price: "£825 pcm",
-    image: nicosiaRoadProperty,
+    image: "/images/properties/walthamstow-victorian-room.jpg",
     description: "A characterful shared home close to local shops, cafés and transport.",
     listingType: "Rent",
     homeType: "Room",
@@ -128,7 +126,7 @@ const listings: Listing[] = [
     title: "Leafy street shared home",
     place: "Stoke Newington · 4 bedroom shared house",
     price: "£950 pcm",
-    image: stokeNewingtonProperty,
+    image: "/images/properties/stoke-shared-house.jpg",
     description: "A bright shared home on a residential street, a short walk from local cafés.",
     listingType: "Rent",
     homeType: "Room",
@@ -140,7 +138,7 @@ const listings: Listing[] = [
     title: "Two-bed Victorian maisonette",
     place: "Leyton · 2 bedroom entire home",
     price: "£1,850 pcm",
-    image: "/images/room-cream.png",
+    image: "/images/properties/leyton-maisonette.jpg",
     description: "A bright, characterful home with a separate living room and easy Central line connections.",
     listingType: "Rent",
     homeType: "Entire home",
@@ -151,7 +149,7 @@ const listings: Listing[] = [
     title: "Sunny room in a friendly terrace",
     place: "Walthamstow · 4 bedroom shared house",
     price: "£975 pcm",
-    image: "/images/room-green.png",
+    image: "/images/properties/walthamstow-sunny-room.jpg",
     description: "A comfortable double room close to the market, with a shared garden and spacious kitchen.",
     listingType: "Rent",
     homeType: "Room",
@@ -163,7 +161,7 @@ const listings: Listing[] = [
     title: "Bright two-bed garden flat",
     place: "Stoke Newington · 2 bedroom entire home",
     price: "£2,250 pcm",
-    image: stokeNewingtonProperty,
+    image: "/images/properties/stoke-garden-flat.jpg",
     description: "A calm, well-connected home with a private garden and independent cafés nearby.",
     listingType: "Rent",
     homeType: "Entire home",
@@ -174,7 +172,7 @@ const listings: Listing[] = [
     title: "Modern two-bed Leyton flat",
     place: "Leyton · 2 bedroom flat",
     price: "£425,000",
-    image: "/images/room-light.png",
+    image: "/images/properties/leyton-flat-buy.jpg",
     description: "A sample first-home option with a bright open-plan living space and local shops close by.",
     listingType: "Buy",
     homeType: "Entire home",
@@ -185,7 +183,7 @@ const listings: Listing[] = [
     title: "Three-bed Walthamstow terrace",
     place: "Walthamstow · 3 bedroom house",
     price: "£595,000",
-    image: nicosiaRoadProperty,
+    image: "/images/properties/walthamstow-terrace.jpg",
     description: "A sample family-sized terrace with room to grow and green space within easy reach.",
     listingType: "Buy",
     homeType: "Entire home",
@@ -196,8 +194,76 @@ const listings: Listing[] = [
     title: "Character two-bed maisonette",
     place: "Stoke Newington · 2 bedroom maisonette",
     price: "£575,000",
-    image: stokeNewingtonProperty,
+    image: "/images/properties/stoke-maisonette.jpg",
     description: "A sample period home near local cafés and neighbourhood green spaces.",
+    listingType: "Buy",
+    homeType: "Entire home",
+  },
+  {
+    id: "leyton-garden-house-rent",
+    area: "Leyton",
+    title: "Garden room in a friendly terrace",
+    place: "Leyton · 3 bedroom shared house",
+    price: "£1,050 pcm",
+    image: "/images/properties/leyton-garden-house.jpg",
+    description: "A relaxed double room in a shared terrace with a sunny garden and an open-plan kitchen.",
+    listingType: "Rent",
+    homeType: "Room",
+    housemates: "Two sociable housemates who enjoy a shared meal and respect quiet evenings.",
+  },
+  {
+    id: "walthamstow-loft-rent",
+    area: "Walthamstow",
+    title: "Bright two-bed loft apartment",
+    place: "Walthamstow · 2 bedroom flat",
+    price: "£2,100 pcm",
+    image: "/images/properties/walthamstow-loft.jpg",
+    description: "A spacious, light-filled flat with an open living area and easy access to the market.",
+    listingType: "Rent",
+    homeType: "Entire home",
+  },
+  {
+    id: "stoke-newington-room-rent",
+    area: "Stoke Newington",
+    title: "Calm double room near Church Street",
+    place: "Stoke Newington · 3 bedroom shared house",
+    price: "£1,025 pcm",
+    image: "/images/properties/stoke-newington-room.jpg",
+    description: "A comfortable room in a shared home, close to independent shops and local bus routes.",
+    listingType: "Rent",
+    homeType: "Room",
+    housemates: "Two friendly housemates who like a tidy kitchen and low-key weekends.",
+  },
+  {
+    id: "leyton-victorian-terrace-buy",
+    area: "Leyton",
+    title: "Three-bed Victorian terrace",
+    place: "Leyton · 3 bedroom house",
+    price: "£535,000",
+    image: "/images/properties/leyton-victorian-terrace.jpg",
+    description: "A sample period home with generous living space and a private rear garden.",
+    listingType: "Buy",
+    homeType: "Entire home",
+  },
+  {
+    id: "walthamstow-flat-buy",
+    area: "Walthamstow",
+    title: "Two-bed garden apartment",
+    place: "Walthamstow · 2 bedroom flat",
+    price: "£390,000",
+    image: "/images/properties/walthamstow-flat-buy.jpg",
+    description: "A sample first-home option with bright interiors and a private outdoor space.",
+    listingType: "Buy",
+    homeType: "Entire home",
+  },
+  {
+    id: "stoke-newington-flat-buy",
+    area: "Stoke Newington",
+    title: "One-bed character flat",
+    place: "Stoke Newington · 1 bedroom flat",
+    price: "£465,000",
+    image: "/images/properties/stoke-newington-flat-buy.jpg",
+    description: "A sample period flat with a separate living room close to the neighbourhood high street.",
     listingType: "Buy",
     homeType: "Entire home",
   },
@@ -230,15 +296,29 @@ const roommateProfiles = [
 function getQuestionReply(question: string): string {
   const normalized = question.toLocaleLowerCase("en-GB");
   if (normalized.includes("bill") || normalized.includes("cost")) {
-    return "In this sample set, the Quiet garden room in Leyton says bills are included. The other sample listings do not specify bills, so check with the provider.";
+    return "Quick money chat: the Quiet garden room in Leyton says bills are included. The other sample listings don’t say, so check with the provider before your budget starts doing parkour.";
   }
   if (normalized.includes("bike") || normalized.includes("cycle")) {
-    return "Bike storage is not specified in these sample listings. Please confirm it with the provider before making a decision.";
+    return "Bike storage isn’t listed in these samples, so Homie can’t promise your bike a VIP parking spot. Check with the provider before deciding.";
   }
   if (normalized.includes("who") || normalized.includes("housemate") || normalized.includes("live")) {
-    return "You can browse the sample housemate profiles and shared-home matches in the chat demo. Always confirm household details with the provider.";
+    return "Housemates are a huge part of the home lore. I can show sample profiles and shared-home matches; always confirm who lives there and how the household works with the provider.";
   }
-  return "This is a scripted demo and only has sample property details. Try asking about bills, bike storage or housemates.";
+  return "Homie’s running on lovingly scripted demo info, not mind-reading powers. Try asking about bills, bike storage or housemates.";
+}
+
+function getChatFaqReply(question: string): string | null {
+  const normalized = question.toLocaleLowerCase("en-GB");
+  if (normalized.includes("bill") || normalized.includes("cost")) return getQuestionReply(question);
+  if (normalized.includes("bike") || normalized.includes("cycle")) return getQuestionReply(question);
+  if (
+    normalized.includes("housemate") ||
+    normalized.includes("roommate") ||
+    normalized.includes("who would i live")
+  ) {
+    return getQuestionReply(question);
+  }
+  return null;
 }
 
 const areaTabs = ["Feel", "Everyday life", "Getting around", "Good to know"] as const;
@@ -258,10 +338,23 @@ const searchChoices = {
 } as const;
 
 function getBudgetChoices(goal: SearchGoal | "") {
+  if (goal === "Property only") {
+    return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Buy up to £600k"];
+  }
   if (goal === "Room in shared property" || goal === "Roommate for existing property") {
     return ["Under £900 pcm", "£900–£1,500 pcm", "Flexible budget"];
   }
-  return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Buy up to £600k"];
+  return ["Rent under £900 pcm", "Rent £900–£1,500 pcm", "Flexible budget"];
+}
+
+function getHousingChoices(goal: SearchGoal | "") {
+  if (goal === "Roommate for existing property") {
+    return ["Room available now", "Room available soon", "I have a whole place to share"];
+  }
+  if (goal === "Room in shared property") {
+    return ["Single room", "Double room", "Flexible on room type"];
+  }
+  return [...searchChoices.housing];
 }
 
 function getSearchPrompt(
@@ -270,43 +363,79 @@ function getSearchPrompt(
 ): Pick<ChatMessage, "text" | "options"> | null {
   const prompts: Partial<Record<SearchStage, Pick<ChatMessage, "text" | "options">>> = {
     welcome: {
-      text: "Welcome! I’ll ask a few quick questions, then show sample areas, homes and roommate matches. Nothing is live or sent to an AI.",
+      text: "Hey, I’m Homie 🏠 Your London home hunt just got a sidekick. I’ll ask a few quick questions, then bring back sample areas, homes and potential housemates. No AI, no awkward DMs, no 47-tab spiral.",
       options: ["Start my search", "How does it work?", "Browse sample listings"],
     },
     goal: {
-      text: "First up, what are you looking for?",
+      text: "First plot point: what are you looking for? Choose the closest fit; we’ll fine-tune the details as we go.",
       options: [...searchChoices.goal],
     },
     budget: {
-      text: "What budget should I keep in mind? Choose the closest fit for now.",
+      text:
+        answers?.goal === "Roommate for existing property"
+          ? "What monthly budget should your potential housemate fit? Pick the closest one; we’ll keep the numbers visible."
+          : "What budget should I keep in mind? Choose the closest fit for now — we’re not doing rent-price jump scares.",
       options: getBudgetChoices(answers?.goal ?? ""),
     },
     area: {
-      text: "Which neighbourhood would you like to focus on?",
+      text: "Where should Homie drop the map pin? Pick the area you’re curious about; you can still change it later.",
       options: [...searchChoices.area],
     },
     commute: {
-      text: "Where do you need to get to most often?",
+      text: "What’s your regular commute destination (or are you gloriously remote)? This helps me rank the areas, not judge your WFH setup.",
       options: [...searchChoices.commute],
     },
     lifestyle: {
-      text: "What matters most in your day-to-day?",
+      text: "Beyond the commute, what should your everyday vibe look like? Think parks, coffee, or main-character city energy.",
       options: [...searchChoices.lifestyle],
     },
     housing: {
-      text: "What kind of housing setup feels right?",
-      options: [...searchChoices.housing],
+      text:
+        answers?.goal === "Roommate for existing property"
+          ? "Tell me about the place you’ve already got so I can look for the right person, not the wrong floor plan."
+          : answers?.goal === "Room in shared property"
+            ? "What kind of room are you hoping to find?"
+            : "What kind of housing setup feels right?",
+      options: getHousingChoices(answers?.goal ?? ""),
     },
     roommates: {
-      text: "What kind of roommate dynamic would feel like a good fit?",
+      text: "Last people-fit question: what housemate energy would make home feel good?",
       options: [...searchChoices.roommates],
     },
     review: {
-      text: "That’s the shape of your search. Review or change anything below, then we’ll pull together the matches.",
+      text: "Search brief: assembled ✨ Give it a quick once-over below. Change anything that’s off, then I’ll pull your matches.",
       options: ["Generate recommendations", "Start over", "Browse all sample listings"],
     },
   };
   return prompts[stage] ?? null;
+}
+
+function getStageTransition(
+  stage: SearchStage,
+  selected: string,
+  nextStage: SearchStage,
+): string {
+  const reactions: Partial<Record<SearchStage, string>> = {
+    goal: `Got you: ${selected.toLowerCase()}.`,
+    budget: `Budget noted: ${selected}. Keeping the maths visible and the vibes immaculate.`,
+    area: `${selected}, locked in. Let’s make sure the commute doesn’t become your new full-time hobby.`,
+    commute: "Commute noted. Now for the everyday-life stuff that makes a place feel like yours.",
+    lifestyle: "Vibe check: passed. Let’s match that to the right kind of home setup.",
+    housing: "Home setup noted.",
+    roommates: "Housemate vibe noted. No awkward flatmate auditions required — just a useful starting point.",
+  };
+  const nextStageCopy: Partial<Record<SearchStage, string>> = {
+    budget: "Next, let’s set the budget.",
+    area: "Now, pick an area to explore.",
+    commute: "Where do you need to get to?",
+    lifestyle: "What should your everyday feel like?",
+    housing: "What kind of home are we matching?",
+    roommates: "One final people-fit question.",
+    review: "That’s the brief. Let’s review it together.",
+  };
+  const reaction = reactions[stage] ?? "";
+  const nextCopy = nextStageCopy[nextStage] ?? "";
+  return [reaction, nextCopy].filter(Boolean).join(" ");
 }
 
 function Logo({ goHome }: { goHome: () => void }) {
@@ -352,13 +481,9 @@ function App() {
   const [memory, setMemory] = useState<string[]>(["Move within 6–8 weeks"]);
   const [chatInput, setChatInput] = useState("");
   const [questionMessages, setQuestionMessages] = useState<ChatMessage[]>([
-    { from: "guide", text: "Ask anything. I’ll answer with your search in mind." },
+    { from: "guide", text: "Ask anything. Homie’s got your search context." },
   ]);
   const [questionInput, setQuestionInput] = useState("");
-  const [phoneMessages, setPhoneMessages] = useState<ChatMessage[]>([
-    { from: "guide", text: "Hi Maya. Want to pick up your London search?" },
-  ]);
-  const [phoneInput, setPhoneInput] = useState("");
   const [preferences, setPreferences] = useState({
     reducedMotion: false,
     highContrast: false,
@@ -367,7 +492,6 @@ function App() {
     data: "essential",
   });
   const [preferencesNotice, setPreferencesNotice] = useState("");
-  const [demoState, setDemoState] = useState<"empty" | "loading" | "error">("empty");
 
   useEffect(() => {
     try {
@@ -474,6 +598,16 @@ function App() {
 
     if (searchStage === "welcome") {
       const normalized = clean.toLocaleLowerCase("en-GB");
+      const faqReply = getChatFaqReply(clean);
+      if (faqReply) {
+        appendGuide({
+          from: "guide",
+          text: faqReply,
+          options: ["Start my search", "How does it work?", "Browse sample listings"],
+        });
+        setChatInput("");
+        return;
+      }
       if (normalized.includes("browse")) {
         setMessages((old) => [...old, { from: "you", text: clean }]);
         setChatInput("");
@@ -483,7 +617,7 @@ function App() {
       if (normalized.includes("work") || normalized.includes("how")) {
         appendGuide({
           from: "guide",
-          text: "We’ll set your goal, budget, area and day-to-day preferences, then show sample homes and roommate matches. You can review or change answers before seeing recommendations.",
+          text: "Homie will help set your goal, budget, area and day-to-day preferences, then show sample homes and potential roommate matches. You can review or change everything before seeing recommendations — no commitment, no plot twist.",
           options: ["Start my search", "How does it work?", "Browse sample listings"],
         });
         setChatInput("");
@@ -531,12 +665,17 @@ function App() {
     const stageChoices =
       searchStage === "budget"
         ? getBudgetChoices(searchAnswers.goal)
+        : searchStage === "housing"
+          ? getHousingChoices(searchAnswers.goal)
         : searchChoices[searchStage as keyof typeof searchChoices];
     const selected = stageChoices.find((option) => option.toLocaleLowerCase("en-GB") === clean.toLocaleLowerCase("en-GB"));
     if (!selected) {
+      const faqReply = getChatFaqReply(clean);
       appendGuide({
         from: "guide",
-        text: "I’ve kept this demo focused on a few clear choices. Pick the closest option, and you can adjust it in your review.",
+        text:
+          faqReply ??
+          "Homie’s keeping this demo to clear choices, not a choose-your-own-adventure with 900 endings. Tap the closest fit; you can tweak it in your review.",
         options: [...stageChoices],
       });
       setChatInput("");
@@ -589,10 +728,16 @@ function App() {
 
     setSearchStage(nextStage);
     const nextPrompt = getSearchPrompt(nextStage, updatedAnswers);
+    const transition = getStageTransition(searchStage, selected, nextStage);
     if (nextStage === "review") {
-      appendGuide({ from: "guide", ...nextPrompt!, review: true });
+      appendGuide({
+        from: "guide",
+        ...nextPrompt!,
+        text: `${transition} ${nextPrompt!.text}`,
+        review: true,
+      });
     } else {
-      appendGuide({ from: "guide", ...nextPrompt! });
+      appendGuide({ from: "guide", ...nextPrompt!, text: `${transition} ${nextPrompt!.text}` });
     }
     setMemory((old) => (old.includes(clean) ? old : [...old, clean].slice(-5)));
     setChatInput("");
@@ -607,20 +752,6 @@ function App() {
       { from: "guide", text: getQuestionReply(clean) },
     ]);
     setQuestionInput("");
-  };
-
-  const sendPhoneMessage = () => {
-    const clean = phoneInput.trim();
-    if (!clean) return;
-    setPhoneMessages((old) => [
-      ...old,
-      { from: "you", text: clean },
-      {
-        from: "guide",
-        text: "This is an example reply. The demo cannot contact providers or fetch live listings.",
-      },
-    ]);
-    setPhoneInput("");
   };
 
   const recommendedAreas = [...areas].sort((first, second) => {
@@ -644,6 +775,7 @@ function App() {
     : listingMode;
   const recommendationListings = listings.filter(
     (listing) => {
+      if (searchAnswers.goal === "Roommate for existing property") return false;
       if (searchAnswers.area && listing.area !== searchAnswers.area) return false;
       if (recommendationListingMode !== "All" && listing.listingType !== recommendationListingMode) return false;
       const price = Number(listing.price.replace(/[£,]/g, "").match(/\d+/)?.[0]);
@@ -706,7 +838,7 @@ function App() {
     { key: "area", label: "Area", options: searchChoices.area },
     { key: "commute", label: "Commute", options: searchChoices.commute },
     { key: "lifestyle", label: "Lifestyle", options: searchChoices.lifestyle },
-    { key: "housing", label: "Housing setup", options: searchChoices.housing },
+    { key: "housing", label: "Housing setup", options: getHousingChoices(searchAnswers.goal) },
     { key: "roommates", label: "Roommate vibe", options: searchChoices.roommates },
   ];
   const visibleListings = listings.filter(
@@ -720,18 +852,12 @@ function App() {
       ? "Chat"
       : screen === "rooms"
         ? "Browse homes"
-        : screen === "accessibility"
-          ? "Accessibility"
-          : screen === "messages"
-            ? "Messages"
-            : "Demo states";
+        : "Accessibility";
 
   const navItems: [string, Screen][] = [
     ["Chat", "chat"],
     ["Browse homes", "rooms"],
-    ["Messages", "messages"],
     ["Accessibility", "accessibility"],
-    ["Demo states", "states"],
   ];
 
   const toggleFilter = (filter: string) =>
@@ -818,10 +944,9 @@ function App() {
         {screen === "chat" && (
           <section>
             <div className="eyebrow">Your London home-finding chat</div>
-            <h1>One chat. Home, housemates, sorted.</h1>
+            <h1>Homie’s got your home hunt.</h1>
             <p className="lede">
-              Tell me what you’re looking for. I’ll guide you through a few choices and sample matches — all scripted,
-              no AI API.
+              Property, people, commute, budget: we’ll sort the plot before the property plot twist.
             </p>
             <div className="search-progress" aria-label="Search progress">
               <span>{searchStage === "welcome" ? "Welcome" : `Step ${progressIndex + 1} of ${progressStages.length}`}</span>
@@ -846,7 +971,7 @@ function App() {
                       className={`chat-turn ${message.from === "you" ? "user-turn" : "guide-turn"}`}
                     >
                       <div className={`bubble ${message.from}`}>
-                        <small>{message.from === "you" ? "You" : "Rising Star"}</small>
+                        <small>{message.from === "you" ? "You" : "Homie"}</small>
                         {message.text}
                       </div>
                       {message.listingIds && (
@@ -856,7 +981,7 @@ function App() {
                             if (!listing) return null;
                             return (
                               <article className="chat-suggestion-card" key={listing.id}>
-                                <img src={listing.image} alt={listing.title} />
+                                <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                                 <div className="chat-suggestion-copy">
                                   <span className="tag">{listing.area} · {listing.listingType} · {listing.homeType}</span>
                                   <h3>{listing.title}</h3>
@@ -962,7 +1087,7 @@ function App() {
                       )}
                       {message.from === "guide" && index === messages.length - 1 && message.options && (
                         <div className="chat-reply-options" aria-label="Choose a reply">
-                          <span>Choose your next step</span>
+                          <span>Tap a reply to keep the plot moving</span>
                           <div className="quick-replies">
                             {message.options.map((option) => (
                               <button className="chip" key={option} onClick={() => sendChat(option)}>
@@ -981,7 +1106,7 @@ function App() {
                   </p>
                 )}
                 <p className="microcopy chat-demo-note">
-                  Sample profiles and listings only. This chat cannot contact housemates or providers.
+                  Sample listings and people only. Homie can shortlist, not slide into anyone’s DMs.
                 </p>
                 <form
                   className="chat-form"
@@ -1009,14 +1134,14 @@ function App() {
               </div>
               <aside className="chat-guide-panel">
                 <div className="card-kicker">How this works</div>
-                <h2>From “what am I looking for?” to a shortlist.</h2>
+                <h2>From “help, London is huge” to a shortlist.</h2>
                 <ol>
-                  <li>Choose a home or roommate goal.</li>
+                  <li>Pick your home or roommate mission.</li>
                   <li>Set budget, area, commute and lifestyle.</li>
-                  <li>Tell us your home and roommate preferences.</li>
-                  <li>Review answers, then explore sample matches.</li>
+                  <li>Tell Homie your housing and people preferences.</li>
+                  <li>Review the brief, then meet your sample matches.</li>
                 </ol>
-                <p>No AI, live listings or messages sent. It’s a demo, not a lettings agent.</p>
+                <p>No AI, live listings or messages sent. Homie is a demo sidekick, not a lettings agent.</p>
               </aside>
             </div>
           </section>
@@ -1105,7 +1230,7 @@ function App() {
                 <div className="property-grid">
                   {recommendationListings.slice(0, 3).map((listing) => (
                     <article className="property-card" key={listing.id}>
-                      <img src={listing.image} alt={listing.title} />
+                      <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                       <div>
                         <span className="tag">{listing.area} · {listing.listingType} · {listing.homeType}</span>
                         <h3>{listing.title}</h3>
@@ -1303,15 +1428,20 @@ function App() {
                 <div className="property-grid">
                   {areaListings.map((listing) => (
                     <article className="property-card" key={listing.id}>
-                      <img src={listing.image} alt={listing.title} />
+                      <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                       <div>
                         <span className="tag">{listing.listingType} · {listing.homeType}</span>
                         <h3>{listing.title}</h3>
                         <p>{listing.description}</p>
-                        <strong>{listing.price}</strong>
-                        <button className="text-link" onClick={() => navigate("rooms")}>
-                          View listing options →
-                        </button>
+                        <div className="property-card-actions">
+                          <strong>{listing.price}</strong>
+                          <button
+                            className="text-link"
+                            onClick={() => browseListings(listing.area, listing.listingType)}
+                          >
+                            View listing options →
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -1341,7 +1471,7 @@ function App() {
             </div>
             <h1>Rent, buy, or find your people.</h1>
             <p className="lede">
-              Browse sample rooms, shared homes and places to buy. Listings and prices are demo content, not live offers.
+              Browse sample rooms, shared homes and places to buy. Listings and prices are demo content, not live offers; photos are representative, not of specific homes.
             </p>
             <div className="listing-filters" aria-label="Filter sample listings">
               <label>
@@ -1376,7 +1506,7 @@ function App() {
                 </div>
                 {visibleListings.map((listing) => (
                   <article className="room-card" key={listing.id}>
-                    <img src={listing.image} alt={listing.title} />
+                    <img src={listing.image} alt={`Representative photo for ${listing.title}`} />
                     <div className="room-copy">
                       <span className="tag">{listing.listingType} · {listing.homeType} · Sample</span>
                       <h2>{listing.title}</h2>
@@ -1432,7 +1562,7 @@ function App() {
                 <div className="messages" aria-live="polite">
                   {questionMessages.map((message, index) => (
                     <div className={`bubble ${message.from}`} key={index}>
-                      <small>{message.from === "you" ? "You" : "Rising Star"}</small>
+                      <small>{message.from === "you" ? "You" : "Homie"}</small>
                       {message.text}
                     </div>
                   ))}
@@ -1573,135 +1703,11 @@ function App() {
           </section>
         )}
 
-        {screen === "messages" && (
-          <section>
-            <div className="eyebrow">The same help, in a familiar place</div>
-            <h1>Your London search, where you chat.</h1>
-            <p className="lede">Pick up the conversation without losing the choices you’ve already made.</p>
-            <div className="messaging-layout">
-              <div className="message-copy">
-                <h2>Same search. Only the context you choose.</h2>
-                <p>Ask a quick question, check a room or change direction. Your guide remembers the useful bits.</p>
-                <ul className="feature-list">
-                  <li>Recommendations shaped around you</li>
-                  <li>Simple example replies, shaped around your search</li>
-                  <li>Easy to pause and pick up later</li>
-                </ul>
-              </div>
-              <div className="phone">
-                <div className="phone-header">
-                  <span className="logo-mark">✦</span>
-                  <div>
-                    <strong>Rising Star Homes</strong>
-                    <small>Example conversation</small>
-                  </div>
-                </div>
-                <div className="phone-messages" aria-live="polite">
-                  {phoneMessages.map((message, index) => (
-                    <div className={`bubble ${message.from}`} key={index}>
-                      {message.text}
-                    </div>
-                  ))}
-                </div>
-                <form
-                  className="phone-form"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    sendPhoneMessage();
-                  }}
-                >
-                  <input
-                    aria-label="Message Rising Star Homes"
-                    value={phoneInput}
-                    onChange={(event) => setPhoneInput(event.target.value)}
-                    placeholder="Write a message…"
-                  />
-                  <button className="send-round">→</button>
-                </form>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {screen === "states" && (
-          <section>
-            <div className="eyebrow">Thoughtful, even when things change</div>
-            <h1>A helpful next step, in every state.</h1>
-            <p className="lede">A small demonstration of how the experience responds when there’s nothing to show yet.</p>
-            <div className="state-switcher">
-              {(["empty", "loading", "error"] as const).map((state) => (
-                <button
-                  className={demoState === state ? "chip active" : "chip"}
-                  onClick={() => setDemoState(state)}
-                  key={state}
-                >
-                  {state[0].toUpperCase() + state.slice(1)}
-                </button>
-              ))}
-            </div>
-            <div className={`state-card ${demoState}`}>
-              {demoState === "empty" && (
-                <>
-                  {saved.length === 0 ? (
-                    <>
-                      <span className="state-icon">⌂</span>
-                      <h2>Nothing shortlisted yet.</h2>
-                      <p>Save a sample home or room and it will appear here for this visit.</p>
-                      <button className="primary" onClick={() => navigate("recommendations")}>
-                        Explore recommendations
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <h2>Your shortlist</h2>
-                      <p>{saved.length} sample {saved.length === 1 ? "listing" : "listings"} saved for this visit.</p>
-                      <div className="shortlist-list">
-                        {listings
-                          .filter((listing) => saved.includes(listing.id))
-                          .map((listing) => (
-                            <div className="shortlist-item" key={listing.id}>
-                              <strong>{listing.title}</strong>
-                              <span>{listing.price}</span>
-                              <div className="room-actions">
-                                <button className="primary" onClick={() => setRoomModal(listing)}>
-                                  View details
-                                </button>
-                                <button className="save" onClick={() => toggleSaved(listing.id)}>
-                                  Remove
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              {demoState === "loading" && (
-                <>
-                  <span className="loader" />
-                  <h2>Finding the useful bits.</h2>
-                  <p>We’re matching your choices to places that could feel right.</p>
-                </>
-              )}
-              {demoState === "error" && (
-                <>
-                  <span className="state-icon">!</span>
-                  <h2>That didn’t quite work.</h2>
-                  <p>Your choices are safe. Return to your recommendations when you’re ready to try again.</p>
-                  <button className="primary" onClick={() => navigate("recommendations")}>
-                    Return to recommendations
-                  </button>
-                </>
-              )}
-            </div>
-          </section>
-        )}
       </main>
 
       <footer>
         <Logo goHome={goHome} />
-        <span>Demo prototype: chat, housemate matches and property listings use sample content.</span>
+        <span>Demo prototype: property photos, listings, prices and housemate matches are illustrative sample content.</span>
         <a
           className="photo-credit"
           href="https://commons.wikimedia.org/wiki/File:Dagmar_Terrace,_off_Cross_Street_-_geograph.org.uk_-_5381818.jpg"
